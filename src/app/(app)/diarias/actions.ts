@@ -1,0 +1,108 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
+import type { Categoria, ModoItemDiaria, TipoDiaria } from "@/lib/supabase/database.types";
+
+type ItemInput = {
+  modo: ModoItemDiaria;
+  categoria?: Categoria;
+  tipo?: TipoDiaria;
+  faixa?: string;
+  descricao_manual?: string;
+  quantidade: number;
+  valor_unitario: number;
+};
+
+export async function criarSolicitacao(formData: FormData) {
+  const usuario = await getCurrentUsuario();
+  if (!usuario) redirect("/login");
+
+  const pessoa_id = String(formData.get("pessoa_id") ?? "");
+  const municipio_destino = String(formData.get("municipio_destino") ?? "");
+  const instituicao_destino = String(formData.get("instituicao_destino") ?? "");
+  const contato_destino = String(formData.get("contato_destino") ?? "");
+  const finalidade = String(formData.get("finalidade") ?? "");
+  const data_partida = String(formData.get("data_partida") ?? "") || null;
+  const data_chegada = String(formData.get("data_chegada") ?? "") || null;
+  const itens: ItemInput[] = JSON.parse(String(formData.get("itens") ?? "[]"));
+
+  if (!pessoa_id || itens.length === 0) {
+    redirect("/diarias/nova?error=Preencha+o+solicitante+e+ao+menos+um+item");
+  }
+
+  const supabase = await createClient();
+
+  const total = itens.reduce(
+    (acc, item) => acc + item.quantidade * item.valor_unitario,
+    0,
+  );
+
+  const { data: solicitacao, error } = await supabase
+    .from("diarias_solicitacoes")
+    .insert({
+      pessoa_id,
+      municipio_destino,
+      instituicao_destino,
+      contato_destino,
+      finalidade,
+      data_partida,
+      data_chegada,
+      data_solicitacao: new Date().toISOString().slice(0, 10),
+      total,
+      criado_por: usuario?.id,
+    })
+    .select("id")
+    .single();
+
+  if (error || !solicitacao) {
+    redirect(`/diarias/nova?error=${encodeURIComponent(error?.message ?? "Erro ao criar solicitação")}`);
+  }
+
+  const { error: itensError } = await supabase.from("diarias_itens").insert(
+    itens.map((item) => ({
+      solicitacao_id: solicitacao!.id,
+      modo: item.modo,
+      categoria: item.categoria || null,
+      tipo: item.tipo || null,
+      faixa: item.faixa || null,
+      descricao_manual: item.descricao_manual || null,
+      quantidade: item.quantidade,
+      valor_unitario: item.valor_unitario,
+    })),
+  );
+
+  if (itensError) {
+    redirect(`/diarias/nova?error=${encodeURIComponent(itensError.message)}`);
+  }
+
+  revalidatePath("/diarias");
+  redirect(`/diarias/${solicitacao!.id}`);
+}
+
+export async function autorizarSolicitacao(id: string) {
+  const supabase = await createClient();
+  await supabase
+    .from("diarias_solicitacoes")
+    .update({
+      status: "Autorizado",
+      data_autorizacao: new Date().toISOString().slice(0, 10),
+    })
+    .eq("id", id);
+
+  revalidatePath(`/diarias/${id}`);
+  revalidatePath("/diarias");
+}
+
+export async function indeferirSolicitacao(id: string) {
+  const supabase = await createClient();
+  await supabase
+    .from("diarias_solicitacoes")
+    .update({ status: "Indeferido" })
+    .eq("id", id);
+
+  revalidatePath(`/diarias/${id}`);
+  revalidatePath("/diarias");
+}
