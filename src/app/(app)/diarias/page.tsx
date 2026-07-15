@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
 import type { StatusDiaria } from "@/lib/supabase/database.types";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 
@@ -16,10 +17,19 @@ export default async function DiariasPage({
 }) {
   const { status } = await searchParams;
   const supabase = await createClient();
+  const usuario = await getCurrentUsuario();
+
+  const { data: minhaPessoa } = usuario
+    ? await supabase.from("pessoas").select("id").eq("usuario_id", usuario.id).maybeSingle()
+    : { data: null };
+
+  const podeEditarSempre = usuario?.papel === "admin" || usuario?.papel === "ordenador_despesa";
 
   let query = supabase
     .from("diarias_solicitacoes")
-    .select("id, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome)")
+    .select(
+      "id, pessoa_id, numero_diaria, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome)",
+    )
     .order("criado_em", { ascending: false });
 
   if (status) query = query.eq("status", status as StatusDiaria);
@@ -75,28 +85,48 @@ export default async function DiariasPage({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {solicitacoes?.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2">
-                  <Link href={`/diarias/${s.id}`} className="block text-slate-900">
-                    {(s.pessoas as unknown as { nome: string } | null)?.nome ?? "—"}
-                  </Link>
-                </td>
-                <td className="px-4 py-2 text-slate-700">{s.municipio_destino ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-700">{s.finalidade ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-700">
-                  {Number(s.total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </td>
-                <td className="px-4 py-2">
-                  <span className={`rounded-full px-2 py-1 text-xs font-medium ${STATUS_STYLES[s.status] ?? ""}`}>
-                    {s.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2">
-                  <DownloadPdfButton id={s.id} />
-                </td>
-              </tr>
-            ))}
+            {solicitacoes?.map((s) => {
+              const podeEditar = podeEditarSempre || minhaPessoa?.id === s.pessoa_id;
+              return (
+                <tr key={s.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-2">
+                    <Link href={`/diarias/${s.id}`} className="block text-slate-900">
+                      {(s.pessoas as unknown as { nome: string } | null)?.nome ?? "—"}
+                    </Link>
+                    {(s.numero_diaria || s.numero_solicitacao) && (
+                      <span className="block text-xs text-slate-500">
+                        {s.numero_diaria && <>Diária nº {s.numero_diaria}</>}
+                        {s.numero_diaria && s.numero_solicitacao && " · "}
+                        {s.numero_solicitacao && <>Solicitação nº {s.numero_solicitacao}</>}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-slate-700">{s.municipio_destino ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-700">{s.finalidade ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-700">
+                    {Number(s.total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  </td>
+                  <td className="px-4 py-2">
+                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${STATUS_STYLES[s.status] ?? ""}`}>
+                      {s.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      {podeEditar && (
+                        <Link
+                          href={`/diarias/${s.id}/editar`}
+                          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          Editar
+                        </Link>
+                      )}
+                      <DownloadPdfButton id={s.id} />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {solicitacoes?.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
