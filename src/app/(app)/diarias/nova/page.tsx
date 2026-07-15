@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { NovaSolicitacaoForm } from "./form";
+import { SolicitacaoForm } from "../solicitacao-form";
+import { criarSolicitacao } from "../actions";
 
 export default async function NovaSolicitacaoPage({
   searchParams,
@@ -32,7 +33,12 @@ export default async function NovaSolicitacaoPage({
         </p>
       )}
 
-      <NovaSolicitacaoForm pessoas={pessoas ?? []} tabelaValores={tabelaValores ?? []} />
+      <SolicitacaoForm
+        action={criarSolicitacao}
+        pessoas={pessoas ?? []}
+        tabelaValores={tabelaValores ?? []}
+        submitLabel="Enviar solicitação"
+      />
     </div>
   );
 }

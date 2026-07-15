@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
@@ -29,6 +30,15 @@ export default async function DetalheSolicitacaoPage({
     solicitacao.status === "Solicitado" &&
     (usuario?.papel === "ordenador_despesa" || usuario?.papel === "admin");
 
+  const { data: minhaPessoa } = usuario
+    ? await supabase.from("pessoas").select("id").eq("usuario_id", usuario.id).maybeSingle()
+    : { data: null };
+
+  const podeEditar =
+    usuario?.papel === "admin" ||
+    usuario?.papel === "ordenador_despesa" ||
+    minhaPessoa?.id === solicitacao.pessoa_id;
+
   const pessoa = solicitacao.pessoas as unknown as {
     nome: string;
     cargo: string;
@@ -44,12 +54,37 @@ export default async function DetalheSolicitacaoPage({
           </h1>
           <p className="text-sm text-slate-500">{pessoa?.cargo}</p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-          {solicitacao.status}
-        </span>
+        <div className="flex items-center gap-3">
+          {podeEditar && (
+            <Link
+              href={`/diarias/${id}/editar`}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Editar
+            </Link>
+          )}
+          <Link
+            href={`/diarias/${id}/imprimir`}
+            target="_blank"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Imprimir (Anexo I)
+          </Link>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+            {solicitacao.status}
+          </span>
+        </div>
       </div>
 
       <dl className="mt-6 grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-4 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-slate-500">Número da diária</dt>
+          <dd className="text-slate-900">{solicitacao.numero_diaria ?? "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-slate-500">Número da solicitação</dt>
+          <dd className="text-slate-900">{solicitacao.numero_solicitacao ?? "—"}</dd>
+        </div>
         <div>
           <dt className="text-slate-500">Destino</dt>
           <dd className="text-slate-900">{solicitacao.municipio_destino ?? "—"}</dd>

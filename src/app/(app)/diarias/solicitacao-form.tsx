@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { criarSolicitacao } from "../actions";
 
 type Pessoa = { id: string; nome: string; categoria: string };
 type ValorTabela = { tipo: string; faixa: string; categoria: string; valor: number };
@@ -13,6 +12,18 @@ type Item = {
   descricao_manual: string;
   quantidade: number;
   valor_unitario: number;
+};
+
+export type ValoresIniciais = {
+  numero_diaria: string;
+  numero_solicitacao: string;
+  municipio_destino: string;
+  instituicao_destino: string;
+  contato_destino: string;
+  data_partida: string;
+  data_chegada: string;
+  finalidade: string;
+  itens: Item[];
 };
 
 const TIPOS = [
@@ -31,15 +42,25 @@ function novoItem(): Item {
   };
 }
 
-export function NovaSolicitacaoForm({
+export function SolicitacaoForm({
+  action,
   pessoas,
+  pessoaFixaId,
   tabelaValores,
+  valoresIniciais,
+  submitLabel,
 }: {
+  action: (formData: FormData) => void;
   pessoas: Pessoa[];
+  pessoaFixaId?: string;
   tabelaValores: ValorTabela[];
+  valoresIniciais?: ValoresIniciais;
+  submitLabel: string;
 }) {
-  const [pessoaId, setPessoaId] = useState("");
-  const [itens, setItens] = useState<Item[]>([novoItem()]);
+  const [pessoaId, setPessoaId] = useState(pessoaFixaId ?? "");
+  const [itens, setItens] = useState<Item[]>(
+    valoresIniciais?.itens.length ? valoresIniciais.itens : [novoItem()],
+  );
 
   const pessoaSelecionada = pessoas.find((p) => p.id === pessoaId);
 
@@ -74,7 +95,7 @@ export function NovaSolicitacaoForm({
   const total = itens.reduce((acc, item) => acc + item.quantidade * item.valor_unitario, 0);
 
   return (
-    <form action={criarSolicitacao} className="mt-6 space-y-6">
+    <form action={action} className="mt-6 space-y-6">
       <input
         type="hidden"
         name="itens"
@@ -94,26 +115,58 @@ export function NovaSolicitacaoForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-medium text-slate-700">Solicitante</label>
-          <select
-            name="pessoa_id"
-            required
-            value={pessoaId}
-            onChange={(e) => setPessoaId(e.target.value)}
+          {pessoaFixaId ? (
+            <>
+              <input
+                type="hidden"
+                name="pessoa_id"
+                value={pessoaFixaId}
+              />
+              <p className="mt-1 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
+                {pessoaSelecionada?.nome} ({pessoaSelecionada?.categoria})
+              </p>
+            </>
+          ) : (
+            <select
+              name="pessoa_id"
+              required
+              value={pessoaId}
+              onChange={(e) => setPessoaId(e.target.value)}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="">Selecione…</option>
+              {pessoas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome} ({p.categoria})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Número da diária</label>
+          <input
+            name="numero_diaria"
+            defaultValue={valoresIniciais?.numero_diaria}
+            placeholder="ex.: 161"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="">Selecione…</option>
-            {pessoas.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nome} ({p.categoria})
-              </option>
-            ))}
-          </select>
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Número da solicitação</label>
+          <input
+            name="numero_solicitacao"
+            defaultValue={valoresIniciais?.numero_solicitacao}
+            placeholder="ex.: 020/2026"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700">Município/destino</label>
           <input
             name="municipio_destino"
             required
+            defaultValue={valoresIniciais?.municipio_destino}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -121,6 +174,7 @@ export function NovaSolicitacaoForm({
           <label className="block text-sm font-medium text-slate-700">Instituição de destino</label>
           <input
             name="instituicao_destino"
+            defaultValue={valoresIniciais?.instituicao_destino}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -128,6 +182,7 @@ export function NovaSolicitacaoForm({
           <label className="block text-sm font-medium text-slate-700">Contato no destino</label>
           <input
             name="contato_destino"
+            defaultValue={valoresIniciais?.contato_destino}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -136,6 +191,7 @@ export function NovaSolicitacaoForm({
           <input
             type="date"
             name="data_partida"
+            defaultValue={valoresIniciais?.data_partida}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -144,6 +200,7 @@ export function NovaSolicitacaoForm({
           <input
             type="date"
             name="data_chegada"
+            defaultValue={valoresIniciais?.data_chegada}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -153,6 +210,7 @@ export function NovaSolicitacaoForm({
             name="finalidade"
             required
             rows={3}
+            defaultValue={valoresIniciais?.finalidade}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -283,7 +341,7 @@ export function NovaSolicitacaoForm({
         type="submit"
         className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
       >
-        Enviar solicitação
+        {submitLabel}
       </button>
     </form>
   );

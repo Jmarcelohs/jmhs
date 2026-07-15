@@ -21,6 +21,8 @@ export async function criarSolicitacao(formData: FormData) {
   if (!usuario) redirect("/login");
 
   const pessoa_id = String(formData.get("pessoa_id") ?? "");
+  const numero_diaria = String(formData.get("numero_diaria") ?? "") || null;
+  const numero_solicitacao = String(formData.get("numero_solicitacao") ?? "") || null;
   const municipio_destino = String(formData.get("municipio_destino") ?? "");
   const instituicao_destino = String(formData.get("instituicao_destino") ?? "");
   const contato_destino = String(formData.get("contato_destino") ?? "");
@@ -44,6 +46,8 @@ export async function criarSolicitacao(formData: FormData) {
     .from("diarias_solicitacoes")
     .insert({
       pessoa_id,
+      numero_diaria,
+      numero_solicitacao,
       municipio_destino,
       instituicao_destino,
       contato_destino,
@@ -80,6 +84,81 @@ export async function criarSolicitacao(formData: FormData) {
 
   revalidatePath("/diarias");
   redirect(`/diarias/${solicitacao!.id}`);
+}
+
+export async function editarSolicitacao(id: string, formData: FormData) {
+  const usuario = await getCurrentUsuario();
+  if (!usuario) redirect("/login");
+
+  const numero_diaria = String(formData.get("numero_diaria") ?? "") || null;
+  const numero_solicitacao = String(formData.get("numero_solicitacao") ?? "") || null;
+  const municipio_destino = String(formData.get("municipio_destino") ?? "");
+  const instituicao_destino = String(formData.get("instituicao_destino") ?? "");
+  const contato_destino = String(formData.get("contato_destino") ?? "");
+  const finalidade = String(formData.get("finalidade") ?? "");
+  const data_partida = String(formData.get("data_partida") ?? "") || null;
+  const data_chegada = String(formData.get("data_chegada") ?? "") || null;
+  const itens: ItemInput[] = JSON.parse(String(formData.get("itens") ?? "[]"));
+
+  if (itens.length === 0) {
+    redirect(`/diarias/${id}/editar?error=Inclua+ao+menos+um+item`);
+  }
+
+  const supabase = await createClient();
+
+  const total = itens.reduce(
+    (acc, item) => acc + item.quantidade * item.valor_unitario,
+    0,
+  );
+
+  const { error } = await supabase
+    .from("diarias_solicitacoes")
+    .update({
+      numero_diaria,
+      numero_solicitacao,
+      municipio_destino,
+      instituicao_destino,
+      contato_destino,
+      finalidade,
+      data_partida,
+      data_chegada,
+      total,
+    })
+    .eq("id", id);
+
+  if (error) {
+    redirect(`/diarias/${id}/editar?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const { error: deleteError } = await supabase
+    .from("diarias_itens")
+    .delete()
+    .eq("solicitacao_id", id);
+
+  if (deleteError) {
+    redirect(`/diarias/${id}/editar?error=${encodeURIComponent(deleteError.message)}`);
+  }
+
+  const { error: itensError } = await supabase.from("diarias_itens").insert(
+    itens.map((item) => ({
+      solicitacao_id: id,
+      modo: item.modo,
+      categoria: item.categoria || null,
+      tipo: item.tipo || null,
+      faixa: item.faixa || null,
+      descricao_manual: item.descricao_manual || null,
+      quantidade: item.quantidade,
+      valor_unitario: item.valor_unitario,
+    })),
+  );
+
+  if (itensError) {
+    redirect(`/diarias/${id}/editar?error=${encodeURIComponent(itensError.message)}`);
+  }
+
+  revalidatePath(`/diarias/${id}`);
+  revalidatePath("/diarias");
+  redirect(`/diarias/${id}`);
 }
 
 export async function autorizarSolicitacao(id: string) {

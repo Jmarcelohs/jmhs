@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# arquivo de origem do timbrado (o .docx bruto); a imagem já processada
+# fica versionada em public/timbrado/
+/timbrado/

@@ -77,16 +77,26 @@ src/
     (app)/                 rotas autenticadas (layout com navegação + logout)
       dashboard/
       pessoas/              cadastro único de servidores/vereadores
-      diarias/              módulo piloto: lista, nova solicitação, detalhe/autorização
+      diarias/              lista, nova solicitação, detalhe/autorização/edição
+        solicitacao-form.tsx  formulário compartilhado por "nova" e "editar"
+        [id]/editar/         edição (mesmo já autorizada) por solicitante/ordenador/admin
+    (print)/                rotas de impressão (sem o menu/navegação do app)
+      diarias/[id]/imprimir/  Anexo I com o timbrado oficial como fundo (preview + botão)
+    api/diarias/[id]/pdf/   gera o PDF num Chromium headless (Puppeteer) e devolve o arquivo
     page.tsx                redireciona "/" para "/dashboard"
   lib/
     supabase/               clientes Supabase (browser/server/middleware) + tipos do banco
     auth/                   helper para ler o usuário logado e seu papel
   proxy.ts                  substitui o antigo middleware.ts (convenção do Next.js 16);
                              protege rotas e renova a sessão do Supabase Auth
+public/
+  timbrado/pagina-a4.jpg   timbrado oficial (2480×3508px, 300dpi) extraído do .docx fornecido;
+                            usado como background-image na página de impressão
 supabase/
   migrations/0001_schema.sql  schema completo (núcleo + módulo Diárias + esqueleto dos
                                módulos futuros: Requerimentos, Emendas, Veículos)
+  migrations/0002_diarias_editar_autorizada.sql  permite o solicitante editar mesmo após
+                                                  autorizada (RLS)
   seed.sql                    25 pessoas + tabela de valores da Portaria 021/2026
 ```
 
@@ -98,17 +108,25 @@ supabase/
 - Cadastro de pessoas (leitura).
 - Diárias: nova solicitação (Anexo I) com cálculo automático pela tabela oficial ou item
   manual, lista com filtro por status, autorizar/indeferir pelo ordenador da despesa.
+- Geração de PDF do Anexo I no papel timbrado oficial — botão "Salvar PDF" que renderiza a
+  página de impressão num navegador headless (Puppeteer) no servidor e baixa o PDF pronto,
+  sem passar pela caixa de diálogo de impressão do navegador.
+- Edição de solicitação (mesmo já autorizada) pelo solicitante, ordenador da despesa ou
+  admin — não altera o status automaticamente.
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
-- Prestação de contas (Anexo II) — telas e fluxo de aprovação/parecer do Controle Interno.
-- Geração de PDF no papel timbrado oficial (a imagem do timbrado em alta resolução ainda
-  precisa ser extraída do `.docx` fornecido e adicionada ao projeto).
+- Prestação de contas (Anexo II) — telas, fluxo de aprovação/parecer do Controle Interno e
+  o respectivo PDF (a página de impressão do Anexo I em `src/app/(print)/diarias/[id]/imprimir`
+  serve de modelo para reaproveitar).
 - CRUD completo de Pessoas (hoje só leitura) e de Usuários/papéis pela interface.
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
 - Módulos de Requerimentos, Emendas Impositivas e Veículos (só o schema existe).
-- Decisões em aberto: hospedagem definitiva, PDF client-side vs. server-side, política de
-  backup (seção 10 da especificação).
+- Decisões em aberto: hospedagem definitiva, política de backup (seção 10 da especificação).
+  A geração de PDF usa Puppeteer (Chromium headless) no servidor — funciona bem em hospedagem
+  própria/VPS; em serverless (ex. Vercel) precisa de ajuste (`@sparticuz/chromium` ou similar,
+  por causa do limite de tamanho de função e do binário do Chromium). Avaliar isso ao decidir
+  a hospedagem definitiva.
 
 ## 8. Aviso de segurança / LGPD
 
