@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StatusDiaria } from "@/lib/supabase/database.types";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 
 const STATUS_STYLES: Record<string, string> = {
   Solicitado: "bg-amber-50 text-amber-700",
@@ -70,11 +71,12 @@ export default async function DiariasPage({
               <th className="px-4 py-2 text-left font-medium text-slate-500">Finalidade</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Total</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Status</th>
+              <th className="px-4 py-2 text-left font-medium text-slate-500">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {solicitacoes?.map((s) => (
-              <tr key={s.id} className="cursor-pointer hover:bg-slate-50">
+              <tr key={s.id} className="hover:bg-slate-50">
                 <td className="px-4 py-2">
                   <Link href={`/diarias/${s.id}`} className="block text-slate-900">
                     {(s.pessoas as unknown as { nome: string } | null)?.nome ?? "—"}
@@ -90,11 +92,14 @@ export default async function DiariasPage({
                     {s.status}
                   </span>
                 </td>
+                <td className="px-4 py-2">
+                  <DownloadPdfButton id={s.id} />
+                </td>
               </tr>
             ))}
             {solicitacoes?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                   Nenhuma solicitação encontrada.
                 </td>
               </tr>
