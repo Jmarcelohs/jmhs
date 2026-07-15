@@ -135,28 +135,38 @@ produção na Vercel, o código já troca automaticamente para `puppeteer-core` 
 ambiente `VERCEL`, que a própria Vercel define sozinha). Você não precisa mexer nisso, só seguir
 os passos abaixo.
 
-### 8.1 Colocar o código no GitHub
+### 8.1 Repositório no GitHub
+
+O código está em [github.com/Jmarcelohs/jmhs](https://github.com/Jmarcelohs/jmhs), branch
+`main`. Para enviar novas alterações depois de commitar localmente:
 
 ```bash
-# na pasta do projeto
-git remote add origin https://github.com/<seu-usuario>/camara-nepomuceno.git
-git push -u origin master
+git push origin main
 ```
 
-Se não tiver o repositório criado ainda, crie um novo (vazio, sem README) em
-[github.com/new](https://github.com/new) antes de rodar o `git remote add`. No primeiro
-`git push`, o Windows deve abrir uma janela pedindo para você entrar com sua conta do GitHub
-(Git Credential Manager) — é normal, faça login por ali.
+Se precisar clonar/configurar o repositório em outra máquina:
+
+```bash
+git remote add origin https://github.com/Jmarcelohs/jmhs.git
+git push -u origin main
+```
+
+No primeiro `git push` de uma máquina nova, o Windows deve abrir uma janela pedindo login do
+GitHub (Git Credential Manager) — é normal, faça login por ali.
 
 ### 8.2 Importar o projeto na Vercel
 
 1. Crie uma conta em [vercel.com](https://vercel.com) (pode entrar direto com o GitHub).
-2. **Add New → Project** e selecione o repositório `camara-nepomuceno`.
+2. **Add New → Project** e selecione o repositório `Jmarcelohs/jmhs`.
 3. Em **Environment Variables**, adicione os três valores do seu `.env.local`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
 4. Clique em **Deploy**. A região já vem configurada para São Paulo pelo `vercel.json`.
+
+Se as variáveis foram adicionadas depois do primeiro deploy, é preciso disparar um novo deploy
+para elas passarem a valer — o jeito mais simples é fazer qualquer novo `git push` (edite algo
+pequeno e commite) ou usar **Deployments → (⋯) do último deploy → Redeploy** no painel da Vercel.
 
 ### 8.3 Depois do primeiro deploy
 
