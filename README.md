@@ -122,13 +122,54 @@ supabase/
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
 - Módulos de Requerimentos, Emendas Impositivas e Veículos (só o schema existe).
-- Decisões em aberto: hospedagem definitiva, política de backup (seção 10 da especificação).
-  A geração de PDF usa Puppeteer (Chromium headless) no servidor — funciona bem em hospedagem
-  própria/VPS; em serverless (ex. Vercel) precisa de ajuste (`@sparticuz/chromium` ou similar,
-  por causa do limite de tamanho de função e do binário do Chromium). Avaliar isso ao decidir
-  a hospedagem definitiva.
+- Decisão de hospedagem: Vercel (frontend) + Supabase (banco), região São Paulo (`gru1`,
+  ver `vercel.json`) — ainda falta confirmar com o jurídico/TI da Câmara se há exigência formal
+  de hospedagem em território nacional (seção 10 da especificação). Política de backup também
+  segue em aberto.
 
-## 8. Aviso de segurança / LGPD
+## 8. Deploy na Vercel
+
+A geração de PDF usa Puppeteer, que só funciona no seu computador (Windows) por padrão. Em
+produção na Vercel, o código já troca automaticamente para `puppeteer-core` +
+`@sparticuz/chromium` (ver `src/lib/pdf/launch-browser.ts` — a troca é baseada na variável de
+ambiente `VERCEL`, que a própria Vercel define sozinha). Você não precisa mexer nisso, só seguir
+os passos abaixo.
+
+### 8.1 Colocar o código no GitHub
+
+```bash
+# na pasta do projeto
+git remote add origin https://github.com/<seu-usuario>/camara-nepomuceno.git
+git push -u origin master
+```
+
+Se não tiver o repositório criado ainda, crie um novo (vazio, sem README) em
+[github.com/new](https://github.com/new) antes de rodar o `git remote add`. No primeiro
+`git push`, o Windows deve abrir uma janela pedindo para você entrar com sua conta do GitHub
+(Git Credential Manager) — é normal, faça login por ali.
+
+### 8.2 Importar o projeto na Vercel
+
+1. Crie uma conta em [vercel.com](https://vercel.com) (pode entrar direto com o GitHub).
+2. **Add New → Project** e selecione o repositório `camara-nepomuceno`.
+3. Em **Environment Variables**, adicione os três valores do seu `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+4. Clique em **Deploy**. A região já vem configurada para São Paulo pelo `vercel.json`.
+
+### 8.3 Depois do primeiro deploy
+
+- Toda vez que você der `git push` na branch principal, a Vercel publica uma nova versão
+  automaticamente.
+- Teste o botão "Salvar PDF" no site publicado — o primeiro PDF gerado depois de um tempo sem
+  uso pode demorar alguns segundos a mais (a function "esfria" e o Chromium precisa iniciar de
+  novo).
+- Se o PDF der timeout, confira em **Project Settings → Functions** se o plano contratado
+  permite aumentar a duração máxima da function (já configuramos `maxDuration = 60` no código,
+  mas o plano Hobby da Vercel limita a 10s independente disso — pode ser necessário o plano Pro).
+
+## 9. Aviso de segurança / LGPD
 
 Nenhuma tabela armazena CPF. A tabela `usuarios` usa a `anon key` pública do Supabase no
 navegador — por isso **toda tabela tem Row Level Security habilitada** (ver o final de

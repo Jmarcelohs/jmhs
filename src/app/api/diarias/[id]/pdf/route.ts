@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
 import { createClient } from "@/lib/supabase/server";
+import { launchBrowser } from "@/lib/pdf/launch-browser";
+
+export const maxDuration = 60;
 
 function slugify(texto: string) {
   return texto
@@ -44,10 +46,7 @@ export async function GET(
   const cookies = request.cookies.getAll();
   const origin = request.nextUrl.origin;
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();
