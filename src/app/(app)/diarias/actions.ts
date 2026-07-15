@@ -161,6 +161,19 @@ export async function editarSolicitacao(id: string, formData: FormData) {
   redirect(`/diarias/${id}`);
 }
 
+export async function excluirSolicitacao(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("diarias_solicitacoes").delete().eq("id", id);
+
+  revalidatePath("/diarias");
+
+  if (error) {
+    redirect(`/diarias?error=${encodeURIComponent("Não foi possível excluir: " + error.message)}`);
+  }
+
+  redirect("/diarias");
+}
+
 export async function autorizarSolicitacao(id: string) {
   const supabase = await createClient();
   await supabase

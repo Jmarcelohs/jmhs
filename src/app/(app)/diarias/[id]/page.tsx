@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
-import { autorizarSolicitacao, indeferirSolicitacao } from "../actions";
+import { autorizarSolicitacao, indeferirSolicitacao, excluirSolicitacao } from "../actions";
+import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
 
 export default async function DetalheSolicitacaoPage({
   params,
@@ -70,6 +71,9 @@ export default async function DetalheSolicitacaoPage({
           >
             Imprimir (Anexo I)
           </Link>
+          {podeEditar && (
+            <ExcluirSolicitacaoButton action={excluirSolicitacao.bind(null, id)} size="md" />
+          )}
           <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
             {solicitacao.status}
           </span>

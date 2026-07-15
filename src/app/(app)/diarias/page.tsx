@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
 import type { StatusDiaria } from "@/lib/supabase/database.types";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
+import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
+import { excluirSolicitacao } from "./actions";
 
 const STATUS_STYLES: Record<string, string> = {
   Solicitado: "bg-amber-50 text-amber-700",
@@ -13,9 +15,9 @@ const STATUS_STYLES: Record<string, string> = {
 export default async function DiariasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; error?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, error: errorMsg } = await searchParams;
   const supabase = await createClient();
   const usuario = await getCurrentUsuario();
 
@@ -71,6 +73,9 @@ export default async function DiariasPage({
           Erro ao carregar solicitações: {error.message}
         </p>
       )}
+      {errorMsg && (
+        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{errorMsg}</p>
+      )}
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -122,6 +127,9 @@ export default async function DiariasPage({
                         </Link>
                       )}
                       <DownloadPdfButton id={s.id} />
+                      {podeEditar && (
+                        <ExcluirSolicitacaoButton action={excluirSolicitacao.bind(null, s.id)} />
+                      )}
                     </div>
                   </td>
                 </tr>
