@@ -7,6 +7,7 @@
 -- travar quando quem exclui é o dono da prestação (e não o tesoureiro).
 -- ========================================================================
 
+drop policy if exists "diarias_prestacoes_delete" on diarias_prestacoes_contas;
 create policy "diarias_prestacoes_delete" on diarias_prestacoes_contas for delete
   using (
     pessoa_id = auth_pessoa_id()
