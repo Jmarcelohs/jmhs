@@ -55,8 +55,7 @@ export function AnexoIIConteudo({
     <>
       <PaginaA4>
         <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
-          <p className="text-center text-[10pt] font-semibold">ANEXO II</p>
-          <p className="text-center text-[9pt]">
+          <p className="text-center text-[9pt] font-semibold">
             ANEXO II da Resolução nº 040 de 04 de abril de 2023
           </p>
 
