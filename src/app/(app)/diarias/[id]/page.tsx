@@ -4,6 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
 import { autorizarSolicitacao, indeferirSolicitacao, excluirSolicitacao } from "../actions";
 import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
+import { calcularVerificacoes } from "@/lib/diarias/verificacoes";
+
+const VERIFICACAO_ESTILO: Record<string, string> = {
+  ok: "bg-emerald-50 text-emerald-700",
+  atencao: "bg-amber-50 text-amber-700",
+  indisponivel: "bg-slate-100 text-slate-500",
+};
+
+const VERIFICACAO_LABEL: Record<string, string> = {
+  ok: "OK",
+  atencao: "Atenção",
+  indisponivel: "Manual",
+};
 
 export default async function DetalheSolicitacaoPage({
   params,
@@ -54,6 +67,32 @@ export default async function DetalheSolicitacaoPage({
           .eq("solicitacao_id", id)
           .maybeSingle()
       : { data: null };
+
+  let verificacoes: ReturnType<typeof calcularVerificacoes> = [];
+  if (solicitacao.status === "Solicitado") {
+    const { data: anteriores } = await supabase
+      .from("diarias_solicitacoes")
+      .select("id, diarias_prestacoes_contas(parecer)")
+      .eq("pessoa_id", solicitacao.pessoa_id)
+      .eq("status", "Autorizado")
+      .neq("id", id);
+
+    const temPendenciaAnterior = (anteriores ?? []).some((s) => {
+      const prestacoes = s.diarias_prestacoes_contas as unknown as { parecer: string | null }[];
+      return prestacoes.length === 0 || !prestacoes.some((p) => p.parecer);
+    });
+
+    const faixasItens = (itens ?? [])
+      .filter((i) => i.modo === "tabela" && i.faixa)
+      .map((i) => i.faixa as string);
+
+    verificacoes = calcularVerificacoes({
+      dataSolicitacao: solicitacao.data_solicitacao,
+      dataPartida: solicitacao.data_partida,
+      faixasItens,
+      temPendenciaAnterior,
+    });
+  }
 
   return (
     <div>
@@ -164,6 +203,33 @@ export default async function DetalheSolicitacaoPage({
           Total: {Number(solicitacao.total ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </p>
       </div>
+
+      {verificacoes.length > 0 && (
+        <div className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Verificações (art. 4º da Resolução 40/2023)
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Avisos informativos — não bloqueiam a autorização, a decisão final continua sendo do
+            ordenador da despesa.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {verificacoes.map((v) => (
+              <li key={v.titulo} className="flex items-start gap-2 text-sm">
+                <span
+                  className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-xs font-medium ${VERIFICACAO_ESTILO[v.status]}`}
+                >
+                  {VERIFICACAO_LABEL[v.status]}
+                </span>
+                <span>
+                  <strong className="text-slate-900">{v.titulo}:</strong>{" "}
+                  <span className="text-slate-600">{v.descricao}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {podeAutorizar && (
         <div className="mt-6 flex gap-3">

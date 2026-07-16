@@ -118,17 +118,18 @@ supabase/
   ranking de diárias por solicitante.
 - Prestação de contas (Anexo II): relatório da viagem, demonstrativo financeiro
   débito/crédito, aprovação do ordenador, baixa de pagamento pelo tesoureiro, parecer
-  conclusivo do Controle Interno, e o respectivo PDF em 3 páginas.
+  conclusivo do Controle Interno, upload de fotos/documentos (aparecem no PDF), e o
+  respectivo PDF em várias páginas — inclusive combinado com o Anexo I num só arquivo.
+- Diária internacional (art. 8º-A): botão no formulário calcula os 120% da diária com
+  pernoite Brasília/capitais categoria Vereador a partir da tabela vigente.
+- Verificações informativas do art. 4º (prazo de 2 dias úteis, faixa "até 60 km", pendência
+  de prestação de contas anterior) na página da solicitação antes de autorizar — nunca
+  bloqueiam, só avisam. Dotação orçamentária continua manual (não há módulo de orçamento).
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
 - CRUD completo de Pessoas (hoje só leitura) e de Usuários/papéis pela interface.
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
-- Diária internacional (art. 8º-A): já dá para lançar como item manual, mas o sistema não
-  sugere automaticamente os 120% do valor vigente (seção 4.2 da especificação).
-- Verificações automáticas das condicionantes do art. 4º (dotação orçamentária, prazo de
-  2 dias úteis, distância/tempo mínimo, pendências de prestação de contas anteriores) — hoje
-  dependem de checagem manual de quem autoriza.
 - Módulos de Requerimentos, Emendas Impositivas e Veículos (só o schema existe).
 - Decisão de hospedagem: Vercel (frontend) + Supabase (banco), região São Paulo (`gru1`,
   ver `vercel.json`) — ainda falta confirmar com o jurídico/TI da Câmara se há exigência formal

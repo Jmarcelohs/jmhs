@@ -94,6 +94,26 @@ export function SolicitacaoForm({
 
   const total = itens.reduce((acc, item) => acc + item.quantidade * item.valor_unitario, 0);
 
+  function aplicarDiariaInternacional(index: number) {
+    // Art. 8º-A (Resolução 51): 120% da diária com pernoite de
+    // Brasília/capitais, categoria Vereador — sempre essa base, mesmo
+    // que quem viaje seja Efetivo/Comissionado. Recalcula a partir da
+    // tabela vigente em vez de fixar o valor, como pede a especificação.
+    const base = tabelaValores.find(
+      (v) =>
+        v.tipo === "comPernoite" &&
+        v.faixa === "Brasília e outras capitais" &&
+        v.categoria === "Vereador",
+    );
+    if (!base) return;
+    const valor = Math.round(base.valor * 1.2 * 100) / 100;
+    atualizarItem(index, {
+      descricao_manual:
+        "Diária internacional (art. 8º-A) — 120% da diária com pernoite Brasília/capitais Vereador",
+      valor_unitario: valor,
+    });
+  }
+
   return (
     <form action={action} className="mt-6 space-y-6">
       <input
@@ -280,7 +300,16 @@ export function SolicitacaoForm({
                   </>
                 ) : (
                   <div className="min-w-[240px] flex-1">
-                    <label className="block text-xs font-medium text-slate-500">Descrição</label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-medium text-slate-500">Descrição</label>
+                      <button
+                        type="button"
+                        onClick={() => aplicarDiariaInternacional(index)}
+                        className="text-xs text-slate-600 underline hover:text-slate-900"
+                      >
+                        Calcular diária internacional (120%)
+                      </button>
+                    </div>
                     <input
                       value={item.descricao_manual}
                       onChange={(e) => atualizarItem(index, { descricao_manual: e.target.value })}
