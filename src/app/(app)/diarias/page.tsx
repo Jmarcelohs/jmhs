@@ -15,9 +15,9 @@ const STATUS_STYLES: Record<string, string> = {
 export default async function DiariasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<{ status?: string; prestacao?: string; error?: string }>;
 }) {
-  const { status, error: errorMsg } = await searchParams;
+  const { status, prestacao, error: errorMsg } = await searchParams;
   const supabase = await createClient();
   const usuario = await getCurrentUsuario();
 
@@ -30,13 +30,23 @@ export default async function DiariasPage({
   let query = supabase
     .from("diarias_solicitacoes")
     .select(
-      "id, pessoa_id, numero_diaria, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome)",
+      "id, pessoa_id, numero_diaria, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome), diarias_prestacoes_contas(id)",
     )
     .order("criado_em", { ascending: false });
 
-  if (status) query = query.eq("status", status as StatusDiaria);
+  if (prestacao) {
+    query = query.eq("status", "Autorizado");
+  } else if (status) {
+    query = query.eq("status", status as StatusDiaria);
+  }
 
-  const { data: solicitacoes, error } = await query;
+  const { data: brutas, error } = await query;
+
+  const solicitacoes = brutas?.filter((s) => {
+    if (prestacao === "pendente") return (s.diarias_prestacoes_contas ?? []).length === 0;
+    if (prestacao === "realizada") return (s.diarias_prestacoes_contas ?? []).length > 0;
+    return true;
+  });
 
   return (
     <div>
@@ -50,21 +60,34 @@ export default async function DiariasPage({
         </Link>
       </div>
 
-      <div className="mt-4 flex gap-2 text-sm">
+      <div className="mt-4 flex flex-wrap gap-2 text-sm">
         {["Solicitado", "Autorizado", "Indeferido"].map((s) => (
           <Link
             key={s}
             href={`/diarias?status=${s}`}
-            className={`rounded-full px-3 py-1 ${status === s ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+            className={`rounded-full px-3 py-1 ${status === s && !prestacao ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
           >
             {s}
           </Link>
         ))}
         <Link
           href="/diarias"
-          className={`rounded-full px-3 py-1 ${!status ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+          className={`rounded-full px-3 py-1 ${!status && !prestacao ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
         >
           Todas
+        </Link>
+        <span className="mx-1 self-center text-slate-300">|</span>
+        <Link
+          href="/diarias?prestacao=pendente"
+          className={`rounded-full px-3 py-1 ${prestacao === "pendente" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+        >
+          Prestação de contas pendente
+        </Link>
+        <Link
+          href="/diarias?prestacao=realizada"
+          className={`rounded-full px-3 py-1 ${prestacao === "realizada" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+        >
+          Prestação de contas realizada
         </Link>
       </div>
 
@@ -92,6 +115,7 @@ export default async function DiariasPage({
           <tbody className="divide-y divide-slate-100">
             {solicitacoes?.map((s) => {
               const podeEditar = podeEditarSempre || minhaPessoa?.id === s.pessoa_id;
+              const temPrestacao = (s.diarias_prestacoes_contas ?? []).length > 0;
               return (
                 <tr key={s.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2">
@@ -117,7 +141,7 @@ export default async function DiariasPage({
                     </span>
                   </td>
                   <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {podeEditar && (
                         <Link
                           href={`/diarias/${s.id}/editar`}
@@ -127,6 +151,14 @@ export default async function DiariasPage({
                         </Link>
                       )}
                       <DownloadPdfButton id={s.id} />
+                      {s.status === "Autorizado" && (
+                        <Link
+                          href={`/diarias/${s.id}/prestacao-contas`}
+                          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          {temPrestacao ? "Ver prestação" : "Prestar contas"}
+                        </Link>
+                      )}
                       {podeEditar && (
                         <ExcluirSolicitacaoButton action={excluirSolicitacao.bind(null, s.id)} />
                       )}

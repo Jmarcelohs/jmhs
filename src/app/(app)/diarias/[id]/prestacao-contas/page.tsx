@@ -132,13 +132,22 @@ export default async function PrestacaoContasPage({
           </h1>
           <p className="text-sm text-slate-500">{pessoa?.cargo}</p>
         </div>
-        <Link
-          href={`/diarias/${id}/prestacao-contas/imprimir`}
-          target="_blank"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Imprimir (Anexo II)
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/diarias/${id}/prestacao-contas/imprimir`}
+            target="_blank"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Imprimir (Anexo II)
+          </Link>
+          <Link
+            href={`/diarias/${id}/prestacao-contas/imprimir-completo`}
+            target="_blank"
+            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Baixar Anexo I + II
+          </Link>
+        </div>
       </div>
 
       <dl className="mt-6 grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-4 text-sm sm:grid-cols-2">

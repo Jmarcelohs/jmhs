@@ -19,10 +19,18 @@ export function Celula({
   );
 }
 
-export function PaginaA4({ children }: { children: React.ReactNode }) {
+export function PaginaA4({
+  children,
+  quebrarPagina = true,
+}: {
+  children: React.ReactNode;
+  quebrarPagina?: boolean;
+}) {
   return (
     <div
-      className="mx-auto flex h-[297mm] w-[210mm] flex-col bg-white bg-cover bg-no-repeat text-[9pt] text-black shadow-lg print:break-after-page print:shadow-none"
+      className={`mx-auto flex h-[297mm] w-[210mm] flex-col bg-white bg-cover bg-no-repeat text-[9pt] text-black shadow-lg print:shadow-none ${
+        quebrarPagina ? "print:break-after-page" : ""
+      }`}
       style={{ backgroundImage: "url(/timbrado/pagina-a4.jpg)" }}
     >
       {children}
