@@ -26,14 +26,32 @@ function CampoNumero({
   );
 }
 
+export type ValoresIniciaisPrestacao = {
+  relatorio_resultado: string;
+  debito_diarias_previstas: number;
+  debito_diarias_nao_previstas: number;
+  debito_transporte_aereo: number;
+  debito_transporte_urbano: number;
+  credito_recebidas_antecipadamente: number;
+  credito_reembolsar: number;
+  credito_transporte_urbano: number;
+  credito_devolver: number;
+};
+
 export function NovaPrestacaoForm({
   action,
   valorAutorizado,
+  valoresIniciais,
+  submitLabel = "Enviar prestação de contas",
+  mostrarDeclaracao = true,
 }: {
   action: (formData: FormData) => void;
   valorAutorizado: number;
+  valoresIniciais?: ValoresIniciaisPrestacao;
+  submitLabel?: string;
+  mostrarDeclaracao?: boolean;
 }) {
-  const [relatorio, setRelatorio] = useState("");
+  const [relatorio, setRelatorio] = useState(valoresIniciais?.relatorio_resultado ?? "");
 
   return (
     <form action={action} className="mt-6 space-y-6">
@@ -61,16 +79,22 @@ export function NovaPrestacaoForm({
             <CampoNumero
               name="debito_diarias_previstas"
               label="Diárias previstas e realizadas"
-              defaultValue={valorAutorizado}
+              defaultValue={valoresIniciais?.debito_diarias_previstas ?? valorAutorizado}
             />
             <CampoNumero
               name="debito_diarias_nao_previstas"
               label="Diárias não previstas, mas realizadas"
+              defaultValue={valoresIniciais?.debito_diarias_nao_previstas}
             />
-            <CampoNumero name="debito_transporte_aereo" label="Despesas com transporte aéreo" />
+            <CampoNumero
+              name="debito_transporte_aereo"
+              label="Despesas com transporte aéreo"
+              defaultValue={valoresIniciais?.debito_transporte_aereo}
+            />
             <CampoNumero
               name="debito_transporte_urbano"
               label="Despesas com transporte urbano, pedágio, combustível e estacionamento"
+              defaultValue={valoresIniciais?.debito_transporte_urbano}
             />
           </div>
           <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
@@ -80,33 +104,39 @@ export function NovaPrestacaoForm({
             <CampoNumero
               name="credito_recebidas_antecipadamente"
               label="Diárias recebidas antecipadamente"
+              defaultValue={valoresIniciais?.credito_recebidas_antecipadamente}
             />
             <CampoNumero
               name="credito_reembolsar"
               label="Reembolsar diárias realizadas e não recebidas"
+              defaultValue={valoresIniciais?.credito_reembolsar}
             />
             <CampoNumero
               name="credito_transporte_urbano"
               label="Despesas com transporte urbano, pedágio, combustível e estacionamento"
+              defaultValue={valoresIniciais?.credito_transporte_urbano}
             />
             <CampoNumero
               name="credito_devolver"
               label="Devolver diárias recebidas e não realizadas (-)"
+              defaultValue={valoresIniciais?.credito_devolver}
             />
           </div>
         </div>
       </div>
 
-      <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
-        Ao enviar, você declara, sob as penas da lei, que as informações prestadas são
-        verídicas — essa é a autenticação do beneficiário exigida no Anexo II.
-      </p>
+      {mostrarDeclaracao && (
+        <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600">
+          Ao enviar, você declara, sob as penas da lei, que as informações prestadas são
+          verídicas — essa é a autenticação do beneficiário exigida no Anexo II.
+        </p>
+      )}
 
       <button
         type="submit"
         className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
       >
-        Enviar prestação de contas
+        {submitLabel}
       </button>
     </form>
   );

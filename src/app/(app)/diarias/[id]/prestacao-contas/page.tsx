@@ -7,9 +7,11 @@ import {
   aprovarPrestacaoOrdenador,
   darBaixaPagamento,
   emitirParecerControleInterno,
+  excluirPrestacaoContas,
 } from "../../prestacao-contas-actions";
 import { NovaPrestacaoForm } from "./nova-prestacao-form";
 import { AnexosForm } from "./anexos-form";
+import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
 
 function formatarMoeda(valor: number) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -142,6 +144,14 @@ export default async function PrestacaoContasPage({
           <p className="text-sm text-slate-500">{pessoa?.cargo}</p>
         </div>
         <div className="flex items-center gap-3">
+          {podeAnexar && (
+            <Link
+              href={`/diarias/${id}/prestacao-contas/editar`}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Editar
+            </Link>
+          )}
           <Link
             href={`/diarias/${id}/prestacao-contas/imprimir`}
             target="_blank"
@@ -156,6 +166,13 @@ export default async function PrestacaoContasPage({
           >
             Baixar Anexo I + II
           </Link>
+          {podeAnexar && (
+            <ExcluirSolicitacaoButton
+              action={excluirPrestacaoContas.bind(null, prestacao.id, id)}
+              size="md"
+              mensagemConfirmacao="Tem certeza que deseja excluir essa prestação de contas? Todos os anexos e pagamentos registrados também serão apagados. Essa ação não pode ser desfeita."
+            />
+          )}
         </div>
       </div>
 

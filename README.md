@@ -105,29 +105,32 @@ supabase/
 **Feito (Fase 0 + piloto do módulo Diárias):**
 - Schema relacional completo com RLS (Row Level Security) por papel.
 - Login/logout com Supabase Auth, rotas protegidas.
-- Cadastro de pessoas (leitura).
+- Cadastro de pessoas: CRUD completo (cadastrar, editar, inativar/ativar, excluir),
+  restrito a admin — excluir só funciona se a pessoa não tiver diárias/outros registros
+  vinculados, senão o sistema orienta a inativar.
 - Diárias: nova solicitação (Anexo I) com cálculo automático pela tabela oficial ou item
-  manual, lista com filtro por status, autorizar/indeferir pelo ordenador da despesa.
+  manual, lista com filtro por status, autorizar/indeferir pelo ordenador da despesa,
+  editar/excluir (mesmo já autorizada) pelo solicitante, ordenador ou admin.
 - Geração de PDF do Anexo I no papel timbrado oficial — botão "Salvar PDF" que renderiza a
   página de impressão num navegador headless (Puppeteer) no servidor e baixa o PDF pronto,
   sem passar pela caixa de diálogo de impressão do navegador.
-- Edição de solicitação (mesmo já autorizada) pelo solicitante, ordenador da despesa ou
-  admin — não altera o status automaticamente.
-- Exclusão de solicitação (com confirmação), mesma regra de permissão da edição.
-- Painel com estatísticas (pendentes/autorizadas/indeferidas, valor total autorizado) e
-  ranking de diárias por solicitante.
+- Painel com estatísticas (pendentes/autorizadas/indeferidas, valor total autorizado),
+  ranking de diárias por solicitante, e listas de diárias realizadas com prestação de
+  contas em aberto vs. concluída.
 - Prestação de contas (Anexo II): relatório da viagem, demonstrativo financeiro
   débito/crédito, aprovação do ordenador, baixa de pagamento pelo tesoureiro, parecer
-  conclusivo do Controle Interno, upload de fotos/documentos (aparecem no PDF), e o
-  respectivo PDF em várias páginas — inclusive combinado com o Anexo I num só arquivo.
-- Diária internacional (art. 8º-A): botão no formulário calcula os 120% da diária com
-  pernoite Brasília/capitais categoria Vereador a partir da tabela vigente.
+  conclusivo do Controle Interno, upload de fotos/documentos (aparecem no PDF), editar/
+  excluir, e o respectivo PDF em várias páginas — inclusive combinado com o Anexo I num
+  só arquivo. Tudo isso também disponível direto pelas abas "Prestação de contas
+  pendente/realizada" na lista de diárias.
+- Diária internacional (art. 8º-A), com e sem pernoite: botões no formulário calculam os
+  120% da diária de Brasília/capitais categoria Vereador a partir da tabela vigente.
 - Verificações informativas do art. 4º (prazo de 2 dias úteis, faixa "até 60 km", pendência
   de prestação de contas anterior) na página da solicitação antes de autorizar — nunca
   bloqueiam, só avisam. Dotação orçamentária continua manual (não há módulo de orçamento).
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
-- CRUD completo de Pessoas (hoje só leitura) e de Usuários/papéis pela interface.
+- CRUD/gestão de Usuários e papéis pela interface (hoje só via SQL Editor).
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
 - Módulos de Requerimentos, Emendas Impositivas e Veículos (só o schema existe).

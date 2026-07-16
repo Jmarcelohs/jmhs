@@ -5,6 +5,7 @@ import type { StatusDiaria } from "@/lib/supabase/database.types";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
 import { excluirSolicitacao } from "./actions";
+import { excluirPrestacaoContas } from "./prestacao-contas-actions";
 
 const STATUS_STYLES: Record<string, string> = {
   Solicitado: "bg-amber-50 text-amber-700",
@@ -30,7 +31,7 @@ export default async function DiariasPage({
   let query = supabase
     .from("diarias_solicitacoes")
     .select(
-      "id, pessoa_id, numero_diaria, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome), diarias_prestacoes_contas(id)",
+      "id, pessoa_id, numero_diaria, numero_solicitacao, municipio_destino, finalidade, status, total, data_solicitacao, pessoas(nome), diarias_prestacoes_contas(id, parecer)",
     )
     .order("criado_em", { ascending: false });
 
@@ -115,7 +116,10 @@ export default async function DiariasPage({
           <tbody className="divide-y divide-slate-100">
             {solicitacoes?.map((s) => {
               const podeEditar = podeEditarSempre || minhaPessoa?.id === s.pessoa_id;
-              const temPrestacao = (s.diarias_prestacoes_contas ?? []).length > 0;
+              const prestacaoDaLinha = (s.diarias_prestacoes_contas ?? [])[0];
+              const temPrestacao = Boolean(prestacaoDaLinha);
+              const podeGerenciarPrestacao =
+                usuario?.papel === "admin" || minhaPessoa?.id === s.pessoa_id;
               return (
                 <tr key={s.id} className="hover:bg-slate-50">
                   <td className="px-4 py-2">
@@ -150,14 +154,43 @@ export default async function DiariasPage({
                           Editar
                         </Link>
                       )}
-                      <DownloadPdfButton id={s.id} />
+                      <DownloadPdfButton
+                        url={`/api/diarias/${s.id}/pdf`}
+                        nomeArquivoPadrao={`anexo-i-${s.id}.pdf`}
+                      />
                       {s.status === "Autorizado" && (
-                        <Link
-                          href={`/diarias/${s.id}/prestacao-contas`}
-                          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                        >
-                          {temPrestacao ? "Ver prestação" : "Prestar contas"}
-                        </Link>
+                        <>
+                          <Link
+                            href={`/diarias/${s.id}/prestacao-contas`}
+                            className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          >
+                            {temPrestacao ? "Ver prestação" : "Prestar contas"}
+                          </Link>
+                          {temPrestacao && podeGerenciarPrestacao && (
+                            <>
+                              <Link
+                                href={`/diarias/${s.id}/prestacao-contas/editar`}
+                                className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                              >
+                                Editar prestação
+                              </Link>
+                              <DownloadPdfButton
+                                url={`/api/diarias/${s.id}/prestacao-contas/pdf`}
+                                nomeArquivoPadrao={`anexo-ii-${s.id}.pdf`}
+                                label="Salvar PDF (Anexo II)"
+                              />
+                              <ExcluirSolicitacaoButton
+                                action={excluirPrestacaoContas.bind(
+                                  null,
+                                  prestacaoDaLinha!.id,
+                                  s.id,
+                                )}
+                                label="Excluir prestação"
+                                mensagemConfirmacao="Tem certeza que deseja excluir essa prestação de contas? Todos os anexos e pagamentos registrados também serão apagados. Essa ação não pode ser desfeita."
+                              />
+                            </>
+                          )}
+                        </>
                       )}
                       {podeEditar && (
                         <ExcluirSolicitacaoButton action={excluirSolicitacao.bind(null, s.id)} />

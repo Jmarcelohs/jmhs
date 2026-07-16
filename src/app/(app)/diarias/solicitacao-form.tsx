@@ -94,22 +94,20 @@ export function SolicitacaoForm({
 
   const total = itens.reduce((acc, item) => acc + item.quantidade * item.valor_unitario, 0);
 
-  function aplicarDiariaInternacional(index: number) {
-    // Art. 8º-A (Resolução 51): 120% da diária com pernoite de
-    // Brasília/capitais, categoria Vereador — sempre essa base, mesmo
-    // que quem viaje seja Efetivo/Comissionado. Recalcula a partir da
-    // tabela vigente em vez de fixar o valor, como pede a especificação.
+  function aplicarDiariaInternacional(index: number, tipo: "comPernoite" | "semPernoite") {
+    // Art. 8º-A (Resolução 51): 120% da diária de Brasília/capitais,
+    // categoria Vereador — sempre essa base, mesmo que quem viaje seja
+    // Efetivo/Comissionado. Recalcula a partir da tabela vigente em vez
+    // de fixar o valor, como pede a especificação (mesma regra aplicada
+    // à faixa sem pernoite).
     const base = tabelaValores.find(
-      (v) =>
-        v.tipo === "comPernoite" &&
-        v.faixa === "Brasília e outras capitais" &&
-        v.categoria === "Vereador",
+      (v) => v.tipo === tipo && v.faixa === "Brasília e outras capitais" && v.categoria === "Vereador",
     );
     if (!base) return;
     const valor = Math.round(base.valor * 1.2 * 100) / 100;
+    const rotulo = tipo === "comPernoite" ? "com pernoite" : "sem pernoite";
     atualizarItem(index, {
-      descricao_manual:
-        "Diária internacional (art. 8º-A) — 120% da diária com pernoite Brasília/capitais Vereador",
+      descricao_manual: `Diária internacional (art. 8º-A) — 120% da diária ${rotulo} Brasília/capitais Vereador`,
       valor_unitario: valor,
     });
   }
@@ -300,15 +298,24 @@ export function SolicitacaoForm({
                   </>
                 ) : (
                   <div className="min-w-[240px] flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <label className="block text-xs font-medium text-slate-500">Descrição</label>
-                      <button
-                        type="button"
-                        onClick={() => aplicarDiariaInternacional(index)}
-                        className="text-xs text-slate-600 underline hover:text-slate-900"
-                      >
-                        Calcular diária internacional (120%)
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => aplicarDiariaInternacional(index, "comPernoite")}
+                          className="text-xs text-slate-600 underline hover:text-slate-900"
+                        >
+                          Internacional com pernoite (120%)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => aplicarDiariaInternacional(index, "semPernoite")}
+                          className="text-xs text-slate-600 underline hover:text-slate-900"
+                        >
+                          Internacional sem pernoite (120%)
+                        </button>
+                      </div>
                     </div>
                     <input
                       value={item.descricao_manual}

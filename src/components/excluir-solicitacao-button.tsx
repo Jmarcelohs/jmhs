@@ -3,9 +3,13 @@
 export function ExcluirSolicitacaoButton({
   action,
   size = "sm",
+  mensagemConfirmacao = "Tem certeza que deseja excluir essa solicitação de diária? Essa ação não pode ser desfeita.",
+  label = "Excluir",
 }: {
   action: () => Promise<void>;
   size?: "sm" | "md";
+  mensagemConfirmacao?: string;
+  label?: string;
 }) {
   const classes =
     size === "md"
@@ -16,17 +20,13 @@ export function ExcluirSolicitacaoButton({
     <form
       action={action}
       onSubmit={(e) => {
-        if (
-          !confirm(
-            "Tem certeza que deseja excluir essa solicitação de diária? Essa ação não pode ser desfeita.",
-          )
-        ) {
+        if (!confirm(mensagemConfirmacao)) {
           e.preventDefault();
         }
       }}
     >
       <button type="submit" className={classes}>
-        Excluir
+        {label}
       </button>
     </form>
   );

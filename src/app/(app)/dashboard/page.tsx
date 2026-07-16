@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
 
@@ -11,9 +12,21 @@ export default async function DashboardPage() {
 
   const { data: solicitacoes } = await supabase
     .from("diarias_solicitacoes")
-    .select("status, total, pessoas(nome)");
+    .select(
+      "id, status, total, municipio_destino, pessoas(nome), diarias_prestacoes_contas(id, parecer)",
+    );
 
   const lista = solicitacoes ?? [];
+
+  const autorizadasLista = lista.filter((s) => s.status === "Autorizado");
+  const prestacaoPendente = autorizadasLista.filter((s) => {
+    const prestacoes = s.diarias_prestacoes_contas as unknown as { parecer: string | null }[];
+    return prestacoes.length === 0 || !prestacoes.some((p) => p.parecer);
+  });
+  const prestacaoConcluida = autorizadasLista.filter((s) => {
+    const prestacoes = s.diarias_prestacoes_contas as unknown as { parecer: string | null }[];
+    return prestacoes.some((p) => p.parecer);
+  });
 
   const solicitadas = lista.filter((s) => s.status === "Solicitado").length;
   const autorizadas = lista.filter((s) => s.status === "Autorizado").length;
@@ -99,6 +112,54 @@ export default async function DashboardPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <h2 className="mt-8 text-base font-semibold text-slate-900">
+        Diárias realizadas — prestação de contas
+      </h2>
+      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <p className="text-sm font-medium text-amber-700">
+            Em aberto ({prestacaoPendente.length})
+          </p>
+          <ul className="mt-2 space-y-2 text-sm">
+            {prestacaoPendente.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/diarias/${s.id}/prestacao-contas`}
+                  className="text-slate-900 hover:underline"
+                >
+                  {(s.pessoas as unknown as { nome: string } | null)?.nome ?? "—"}
+                </Link>
+                <span className="text-slate-500"> — {s.municipio_destino ?? "—"}</span>
+              </li>
+            ))}
+            {prestacaoPendente.length === 0 && (
+              <li className="text-slate-400">Nenhuma pendência.</li>
+            )}
+          </ul>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <p className="text-sm font-medium text-emerald-700">
+            Concluídas ({prestacaoConcluida.length})
+          </p>
+          <ul className="mt-2 space-y-2 text-sm">
+            {prestacaoConcluida.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/diarias/${s.id}/prestacao-contas`}
+                  className="text-slate-900 hover:underline"
+                >
+                  {(s.pessoas as unknown as { nome: string } | null)?.nome ?? "—"}
+                </Link>
+                <span className="text-slate-500"> — {s.municipio_destino ?? "—"}</span>
+              </li>
+            ))}
+            {prestacaoConcluida.length === 0 && (
+              <li className="text-slate-400">Nenhuma prestação concluída ainda.</li>
+            )}
+          </ul>
+        </div>
       </div>
     </div>
   );

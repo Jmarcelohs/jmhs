@@ -1,6 +1,18 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
+import { alternarAtivoPessoa, excluirPessoa } from "./actions";
+import { ExcluirSolicitacaoButton } from "@/components/excluir-solicitacao-button";
 
-export default async function PessoasPage() {
+export default async function PessoasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error: errorMsg } = await searchParams;
+  const usuario = await getCurrentUsuario();
+  const ehAdmin = usuario?.papel === "admin";
+
   const supabase = await createClient();
   const { data: pessoas, error } = await supabase
     .from("pessoas")
@@ -9,15 +21,30 @@ export default async function PessoasPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">Pessoas</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Cadastro único de servidores e vereadores, compartilhado entre todos os módulos.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Pessoas</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Cadastro único de servidores e vereadores, compartilhado entre todos os módulos.
+          </p>
+        </div>
+        {ehAdmin && (
+          <Link
+            href="/pessoas/nova"
+            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Nova pessoa
+          </Link>
+        )}
+      </div>
 
       {error && (
         <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           Erro ao carregar pessoas: {error.message}
         </p>
+      )}
+      {errorMsg && (
+        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{errorMsg}</p>
       )}
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
@@ -29,6 +56,9 @@ export default async function PessoasPage() {
               <th className="px-4 py-2 text-left font-medium text-slate-500">Cargo</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Categoria</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Situação</th>
+              {ehAdmin && (
+                <th className="px-4 py-2 text-left font-medium text-slate-500">Ações</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -41,11 +71,35 @@ export default async function PessoasPage() {
                 <td className="px-4 py-2 text-slate-700">
                   {pessoa.ativo ? "Ativo" : "Inativo"}
                 </td>
+                {ehAdmin && (
+                  <td className="px-4 py-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/pessoas/${pessoa.id}/editar`}
+                        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        Editar
+                      </Link>
+                      <form action={alternarAtivoPessoa.bind(null, pessoa.id, pessoa.ativo)}>
+                        <button
+                          type="submit"
+                          className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          {pessoa.ativo ? "Inativar" : "Ativar"}
+                        </button>
+                      </form>
+                      <ExcluirSolicitacaoButton
+                        action={excluirPessoa.bind(null, pessoa.id)}
+                        mensagemConfirmacao={`Tem certeza que deseja excluir "${pessoa.nome}"? Só funciona se não houver diárias ou outros registros vinculados a essa pessoa — caso contrário, use "Inativar".`}
+                      />
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
             {pessoas?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={ehAdmin ? 6 : 5} className="px-4 py-6 text-center text-slate-400">
                   Nenhuma pessoa cadastrada ainda.
                 </td>
               </tr>

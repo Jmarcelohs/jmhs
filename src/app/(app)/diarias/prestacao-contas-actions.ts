@@ -92,6 +92,87 @@ export async function criarPrestacaoContas(solicitacaoId: string, formData: Form
   redirect(`/diarias/${solicitacaoId}/prestacao-contas`);
 }
 
+export async function editarPrestacaoContas(
+  prestacaoId: string,
+  solicitacaoId: string,
+  formData: FormData,
+) {
+  const usuario = await getCurrentUsuario();
+  if (!usuario) redirect("/login");
+
+  const supabase = await createClient();
+
+  const relatorio_resultado = String(formData.get("relatorio_resultado") ?? "");
+
+  const debito_diarias_previstas = numero(formData, "debito_diarias_previstas");
+  const debito_diarias_nao_previstas = numero(formData, "debito_diarias_nao_previstas");
+  const debito_transporte_aereo = numero(formData, "debito_transporte_aereo");
+  const debito_transporte_urbano = numero(formData, "debito_transporte_urbano");
+
+  const credito_recebidas_antecipadamente = numero(formData, "credito_recebidas_antecipadamente");
+  const credito_reembolsar = numero(formData, "credito_reembolsar");
+  const credito_transporte_urbano = numero(formData, "credito_transporte_urbano");
+  const credito_devolver = numero(formData, "credito_devolver");
+
+  const total_debito =
+    debito_diarias_previstas +
+    debito_diarias_nao_previstas +
+    debito_transporte_aereo +
+    debito_transporte_urbano;
+  const total_credito =
+    credito_recebidas_antecipadamente +
+    credito_reembolsar +
+    credito_transporte_urbano +
+    credito_devolver;
+
+  const { error } = await supabase
+    .from("diarias_prestacoes_contas")
+    .update({
+      relatorio_resultado,
+      debito_diarias_previstas,
+      debito_diarias_nao_previstas,
+      debito_transporte_aereo,
+      debito_transporte_urbano,
+      credito_recebidas_antecipadamente,
+      credito_reembolsar,
+      credito_transporte_urbano,
+      credito_devolver,
+      total_debito,
+      total_credito,
+    })
+    .eq("id", prestacaoId);
+
+  if (error) {
+    redirect(
+      `/diarias/${solicitacaoId}/prestacao-contas/editar?error=${encodeURIComponent(error.message)}`,
+    );
+  }
+
+  revalidatePath(`/diarias/${solicitacaoId}`);
+  revalidatePath(`/diarias/${solicitacaoId}/prestacao-contas`);
+  revalidatePath("/diarias");
+  redirect(`/diarias/${solicitacaoId}/prestacao-contas`);
+}
+
+export async function excluirPrestacaoContas(prestacaoId: string, solicitacaoId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("diarias_prestacoes_contas")
+    .delete()
+    .eq("id", prestacaoId);
+
+  revalidatePath(`/diarias/${solicitacaoId}`);
+  revalidatePath("/diarias");
+
+  if (error) {
+    redirect(
+      `/diarias/${solicitacaoId}/prestacao-contas?error=${encodeURIComponent("Não foi possível excluir: " + error.message)}`,
+    );
+  }
+
+  redirect(`/diarias/${solicitacaoId}`);
+}
+
 export async function aprovarPrestacaoOrdenador(prestacaoId: string, solicitacaoId: string) {
   const supabase = await createClient();
   await supabase
