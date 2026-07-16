@@ -116,11 +116,11 @@ supabase/
 - Exclusão de solicitação (com confirmação), mesma regra de permissão da edição.
 - Painel com estatísticas (pendentes/autorizadas/indeferidas, valor total autorizado) e
   ranking de diárias por solicitante.
+- Prestação de contas (Anexo II): relatório da viagem, demonstrativo financeiro
+  débito/crédito, aprovação do ordenador, baixa de pagamento pelo tesoureiro, parecer
+  conclusivo do Controle Interno, e o respectivo PDF em 3 páginas.
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
-- Prestação de contas (Anexo II) — telas, fluxo de aprovação/parecer do Controle Interno e
-  o respectivo PDF (a página de impressão do Anexo I em `src/app/(print)/diarias/[id]/imprimir`
-  serve de modelo para reaproveitar).
 - CRUD completo de Pessoas (hoje só leitura) e de Usuários/papéis pela interface.
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
