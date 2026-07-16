@@ -22,6 +22,8 @@ export type Parecer =
   | "aprovacao_com_ressalvas"
   | "reprovacao";
 
+export type TipoAnexo = "imagem" | "pdf";
+
 export interface Database {
   public: {
     Tables: {
@@ -229,6 +231,33 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "diarias_prestacoes_pagamentos_prestacao_id_fkey";
+            columns: ["prestacao_id"];
+            isOneToOne: false;
+            referencedRelation: "diarias_prestacoes_contas";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      diarias_prestacoes_anexos: {
+        Row: {
+          id: string;
+          prestacao_id: string;
+          caminho: string;
+          nome_original: string;
+          tipo: TipoAnexo;
+          criado_por: string | null;
+          criado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["diarias_prestacoes_anexos"]["Row"], "id">> & {
+          prestacao_id: string;
+          caminho: string;
+          nome_original: string;
+          tipo: TipoAnexo;
+        };
+        Update: Partial<Database["public"]["Tables"]["diarias_prestacoes_anexos"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "diarias_prestacoes_anexos_prestacao_id_fkey";
             columns: ["prestacao_id"];
             isOneToOne: false;
             referencedRelation: "diarias_prestacoes_contas";

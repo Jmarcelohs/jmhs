@@ -35,15 +35,21 @@ type Prestacao = {
 
 type Pagamento = { id: string; numero_processo: string | null; valor: number };
 type Pessoa = { nome: string } | null;
+type Foto = { url: string; nome: string };
+type Documento = { nome: string };
 
 export function AnexoIIConteudo({
   prestacao,
   pagamentos,
   pessoa,
+  fotos = [],
+  documentos = [],
 }: {
   prestacao: Prestacao;
   pagamentos: Pagamento[];
   pessoa: Pessoa;
+  fotos?: Foto[];
+  documentos?: Documento[];
 }) {
   return (
     <>
@@ -230,7 +236,33 @@ export function AnexoIIConteudo({
             <Celula span={12} className={`${headerCell} text-[10pt]`}>
               FOTOS
             </Celula>
-            <Celula span={12} className="min-h-[220mm]" />
+            <Celula span={12} className="min-h-[220mm]">
+              {fotos.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 p-1">
+                  {fotos.map((foto, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={foto.url}
+                      alt={foto.nome}
+                      className="h-[60mm] w-full rounded border border-slate-300 object-cover"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="p-2 text-center text-slate-400">Nenhuma foto anexada.</p>
+              )}
+              {documentos.length > 0 && (
+                <div className="mt-4 p-1 text-[8pt]">
+                  <p className="font-semibold">Documentos anexados:</p>
+                  <ul className="list-disc pl-4">
+                    {documentos.map((doc, i) => (
+                      <li key={i}>{doc.nome}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Celula>
           </div>
         </div>
       </PaginaA4>

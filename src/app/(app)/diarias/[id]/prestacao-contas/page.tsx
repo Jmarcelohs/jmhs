@@ -9,6 +9,7 @@ import {
   emitirParecerControleInterno,
 } from "../../prestacao-contas-actions";
 import { NovaPrestacaoForm } from "./nova-prestacao-form";
+import { AnexosForm } from "./anexos-form";
 
 function formatarMoeda(valor: number) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -115,6 +116,14 @@ export default async function PrestacaoContasPage({
     .from("diarias_prestacoes_pagamentos")
     .select("*")
     .eq("prestacao_id", prestacao.id);
+
+  const { data: anexos } = await supabase
+    .from("diarias_prestacoes_anexos")
+    .select("id, nome_original, tipo, caminho")
+    .eq("prestacao_id", prestacao.id)
+    .order("criado_em");
+
+  const podeAnexar = usuario?.papel === "admin" || minhaPessoa?.id === prestacao.pessoa_id;
 
   const podeAprovarOrdenador =
     (usuario?.papel === "ordenador_despesa" || usuario?.papel === "admin") &&
@@ -230,6 +239,10 @@ export default async function PrestacaoContasPage({
       <p className="mt-3 text-sm text-slate-600">
         Autenticado pelo beneficiário em {formatarData(prestacao.data_autenticacao_beneficiario)}.
       </p>
+
+      <div className="mt-6">
+        <AnexosForm prestacaoId={prestacao.id} anexos={anexos ?? []} podeEditar={podeAnexar} />
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-4">

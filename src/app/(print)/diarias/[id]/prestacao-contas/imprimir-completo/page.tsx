@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "../../../../print-button";
 import { AnexoIConteudo } from "../../../anexo-i-conteudo";
 import { AnexoIIConteudo } from "../../../anexo-ii-conteudo";
+import { carregarAnexosParaImpressao } from "@/lib/pdf/anexos";
 
 export default async function ImprimirCompletoPage({
   params,
@@ -46,6 +47,7 @@ export default async function ImprimirCompletoPage({
   } | null;
 
   const pessoaPrestacao = prestacao.pessoas as unknown as { nome: string } | null;
+  const { fotos, documentos } = await carregarAnexosParaImpressao(supabase, prestacao.id);
 
   return (
     <>
@@ -63,6 +65,8 @@ export default async function ImprimirCompletoPage({
         prestacao={prestacao}
         pagamentos={pagamentos ?? []}
         pessoa={pessoaPrestacao}
+        fotos={fotos}
+        documentos={documentos}
       />
     </>
   );
