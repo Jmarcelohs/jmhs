@@ -1,35 +1,8 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PrintButton } from "./print-button";
-
-function formatarData(data: string | null) {
-  if (!data) return "—";
-  const [ano, mes, dia] = data.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
-
-function formatarMoeda(valor: number) {
-  return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function Celula({
-  span,
-  className = "",
-  children,
-}: {
-  span: number;
-  className?: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`border border-black px-2 py-1 ${className}`}
-      style={{ gridColumn: `span ${span} / span ${span}` }}
-    >
-      {children}
-    </div>
-  );
-}
+import { PrintButton } from "../../../print-button";
+import { Celula, headerCell } from "../../../celula";
+import { formatarData, formatarMoeda } from "@/lib/pdf/formato";
 
 export default async function ImprimirSolicitacaoPage({
   params,
@@ -73,11 +46,9 @@ export default async function ImprimirSolicitacaoPage({
   const totalComPernoite = somar(comPernoite);
   const totalSemPernoite = somar(semPernoite);
 
-  const headerCell = "bg-[#CDF3F3] text-center font-semibold";
-
   return (
     <>
-      <PrintButton id={id} />
+      <PrintButton url={`/api/diarias/${id}/pdf`} nomeArquivoPadrao={`anexo-i-${id}.pdf`} />
       <div
         className="mx-auto flex h-[297mm] w-[210mm] flex-col bg-white bg-cover bg-no-repeat text-[9pt] text-black shadow-lg print:shadow-none"
         style={{ backgroundImage: "url(/timbrado/pagina-a4.jpg)" }}

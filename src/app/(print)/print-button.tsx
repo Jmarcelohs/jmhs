@@ -2,8 +2,14 @@
 
 import { useDownloadPdf } from "@/lib/pdf/use-download-pdf";
 
-export function PrintButton({ id }: { id: string }) {
-  const { baixarPdf, carregando, erro } = useDownloadPdf(id);
+export function PrintButton({
+  url,
+  nomeArquivoPadrao,
+}: {
+  url: string;
+  nomeArquivoPadrao?: string;
+}) {
+  const { baixarPdf, carregando, erro } = useDownloadPdf(url, nomeArquivoPadrao);
 
   return (
     <div className="no-print fixed right-6 top-6 flex flex-col items-end gap-2">

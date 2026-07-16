@@ -46,6 +46,15 @@ export default async function DetalheSolicitacaoPage({
     categoria: string;
   } | null;
 
+  const { data: prestacaoExistente } =
+    solicitacao.status === "Autorizado"
+      ? await supabase
+          .from("diarias_prestacoes_contas")
+          .select("id")
+          .eq("solicitacao_id", id)
+          .maybeSingle()
+      : { data: null };
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -71,6 +80,14 @@ export default async function DetalheSolicitacaoPage({
           >
             Imprimir (Anexo I)
           </Link>
+          {solicitacao.status === "Autorizado" && (
+            <Link
+              href={`/diarias/${id}/prestacao-contas`}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              {prestacaoExistente ? "Ver prestação de contas" : "Prestar contas"}
+            </Link>
+          )}
           {podeEditar && (
             <ExcluirSolicitacaoButton action={excluirSolicitacao.bind(null, id)} size="md" />
           )}

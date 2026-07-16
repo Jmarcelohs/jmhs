@@ -19,21 +19,21 @@ export async function GET(
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
 
-  const { data: solicitacao } = await supabase
-    .from("diarias_solicitacoes")
-    .select("numero_diaria, pessoas(nome)")
-    .eq("id", id)
+  const { data: prestacao } = await supabase
+    .from("diarias_prestacoes_contas")
+    .select("numero_solicitacao, pessoas(nome)")
+    .eq("solicitacao_id", id)
     .single();
 
-  if (!solicitacao) {
-    return NextResponse.json({ error: "Solicitação não encontrada" }, { status: 404 });
+  if (!prestacao) {
+    return NextResponse.json({ error: "Prestação de contas não encontrada" }, { status: 404 });
   }
 
-  const pessoa = solicitacao.pessoas as unknown as { nome: string } | null;
-  const partes = ["anexo-i"];
-  if (solicitacao.numero_diaria) partes.push(`diaria-${slugify(solicitacao.numero_diaria)}`);
+  const pessoa = prestacao.pessoas as unknown as { nome: string } | null;
+  const partes = ["anexo-ii"];
+  if (prestacao.numero_solicitacao) partes.push(`solicitacao-${slugify(prestacao.numero_solicitacao)}`);
   if (pessoa?.nome) partes.push(slugify(pessoa.nome));
   const filename = `${partes.join("-").toLowerCase()}.pdf`;
 
-  return gerarPdfDeRota(request, `/diarias/${id}/imprimir`, filename);
+  return gerarPdfDeRota(request, `/diarias/${id}/prestacao-contas/imprimir`, filename);
 }
