@@ -51,6 +51,14 @@ export function AnexoIIConteudo({
   fotos?: Foto[];
   documentos?: Documento[];
 }) {
+  const FOTOS_POR_PAGINA = 2;
+  const paginasDeFotos: Foto[][] =
+    fotos.length > 0
+      ? Array.from({ length: Math.ceil(fotos.length / FOTOS_POR_PAGINA) }, (_, i) =>
+          fotos.slice(i * FOTOS_POR_PAGINA, (i + 1) * FOTOS_POR_PAGINA),
+        )
+      : [[]];
+
   return (
     <>
       <PaginaA4>
@@ -229,42 +237,47 @@ export function AnexoIIConteudo({
         </div>
       </PaginaA4>
 
-      <PaginaA4 quebrarPagina={false}>
-        <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
-          <TabelaGrid>
-            <Celula span={12} className={`${headerCell} text-[10pt]`}>
-              FOTOS
-            </Celula>
-            <Celula span={12} className="min-h-[220mm]">
-              {fotos.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2 p-1">
-                  {fotos.map((foto, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={foto.url}
-                      alt={foto.nome}
-                      className="h-[60mm] w-full rounded border border-slate-300 object-cover"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="p-2 text-center text-slate-400">Nenhuma foto anexada.</p>
-              )}
-              {documentos.length > 0 && (
-                <div className="mt-4 p-1 text-[8pt]">
-                  <p className="font-semibold">Documentos anexados:</p>
-                  <ul className="list-disc pl-4">
-                    {documentos.map((doc, i) => (
-                      <li key={i}>{doc.nome}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </Celula>
-          </TabelaGrid>
-        </div>
-      </PaginaA4>
+      {paginasDeFotos.map((grupo, indice) => {
+        const ultimaPagina = indice === paginasDeFotos.length - 1;
+        return (
+          <PaginaA4 key={indice} quebrarPagina={!ultimaPagina}>
+            <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
+              <TabelaGrid>
+                <Celula span={12} className={`${headerCell} text-[10pt]`}>
+                  FOTOS
+                </Celula>
+                <Celula span={12} className="min-h-[220mm]">
+                  {grupo.length > 0 ? (
+                    <div className="flex h-full flex-col gap-3 p-1">
+                      {grupo.map((foto, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={i}
+                          src={foto.url}
+                          alt={foto.nome}
+                          className="h-[105mm] w-full rounded border border-slate-300 object-cover"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="p-2 text-center text-slate-400">Nenhuma foto anexada.</p>
+                  )}
+                  {ultimaPagina && documentos.length > 0 && (
+                    <div className="mt-4 p-1 text-[8pt]">
+                      <p className="font-semibold">Documentos anexados:</p>
+                      <ul className="list-disc pl-4">
+                        {documentos.map((doc, i) => (
+                          <li key={i}>{doc.nome}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </Celula>
+              </TabelaGrid>
+            </div>
+          </PaginaA4>
+        );
+      })}
     </>
   );
 }

@@ -30,15 +30,12 @@ export function TabelaGrid({
   className?: string;
   children: React.ReactNode;
 }) {
-  // Border via style inline (não classe Tailwind) e 2px em vez de 1px:
-  // no Chromium headless, hairlines de 1px nessa borda específica saíam
-  // apagadas/ausentes na rasterização do PDF (mesmo aparecendo bem na
-  // tela). 2px evita o problema de sub-pixel sem destoar muito das
-  // bordas de 1px das células internas.
+  // A borda de 1px sumindo na rasterização do PDF era causada pelo
+  // deviceScaleFactor da página no Puppeteer (ver gerar-pdf.ts) — corrigido
+  // lá, então aqui a borda volta a ser 1px, igual às células internas.
   return (
     <div
-      className={`grid grid-cols-12 ${className}`}
-      style={{ borderTop: "2px solid #000", borderLeft: "2px solid #000" }}
+      className={`grid grid-cols-12 border-t border-l border-black ${className}`}
     >
       {children}
     </div>

@@ -22,6 +22,12 @@ export async function gerarPdfDeRota(
   try {
     const page = await browser.newPage();
 
+    // deviceScaleFactor 1 (padrão) faz o Chromium arredondar bordas finas
+    // (1px) pra posições de sub-pixel na hora de rasterizar o PDF, e elas
+    // somem ou ficam apagadas. Em 2, a mesma borda de 1px vira 2 pixels
+    // físicos e renderiza nítida — sem precisar engrossar a borda no CSS.
+    await page.setViewport({ width: 1240, height: 1754, deviceScaleFactor: 2 });
+
     await page.setCookie(
       ...cookies.map((cookie) => ({
         name: cookie.name,
