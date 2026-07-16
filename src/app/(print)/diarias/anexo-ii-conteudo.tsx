@@ -1,4 +1,4 @@
-import { Celula, headerCell, PaginaA4 } from "../celula";
+import { Celula, headerCell, PaginaA4, TabelaGrid } from "../celula";
 import { formatarData, formatarMoeda } from "@/lib/pdf/formato";
 
 const PARECER_LABEL: Record<string, string> = {
@@ -60,7 +60,7 @@ export function AnexoIIConteudo({
             ANEXO II da Resolução nº 040 de 04 de abril de 2023
           </p>
 
-          <div className="mt-4 grid grid-cols-12">
+          <TabelaGrid className="mt-4">
             <Celula span={12} className={`${headerCell} text-[10pt]`}>
               PRESTAÇÃO DE CONTAS DE DIÁRIA DE VIAGEM
             </Celula>
@@ -99,13 +99,13 @@ export function AnexoIIConteudo({
             <Celula span={12} className="min-h-[140mm] align-top whitespace-pre-wrap">
               {prestacao.relatorio_resultado}
             </Celula>
-          </div>
+          </TabelaGrid>
         </div>
       </PaginaA4>
 
       <PaginaA4>
         <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
-          <div className="grid grid-cols-12">
+          <TabelaGrid>
             <Celula span={12} className={`${headerCell} text-[10pt]`}>
               DEMONSTRATIVO FINANCEIRO
             </Celula>
@@ -226,13 +226,13 @@ export function AnexoIIConteudo({
                 {prestacao.controle_interno_cargo}
               </div>
             </Celula>
-          </div>
+          </TabelaGrid>
         </div>
       </PaginaA4>
 
       <PaginaA4 quebrarPagina={false}>
         <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
-          <div className="grid grid-cols-12">
+          <TabelaGrid>
             <Celula span={12} className={`${headerCell} text-[10pt]`}>
               FOTOS
             </Celula>
@@ -263,7 +263,7 @@ export function AnexoIIConteudo({
                 </div>
               )}
             </Celula>
-          </div>
+          </TabelaGrid>
         </div>
       </PaginaA4>
     </>

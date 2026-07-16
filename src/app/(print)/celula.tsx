@@ -1,5 +1,9 @@
 export const headerCell = "bg-[#CDF3F3] text-center font-semibold";
 
+// Cada célula desenha só a borda direita/inferior — a borda de cima e da
+// esquerda da tabela inteira vem do wrapper (TabelaGrid). Isso evita que
+// bordas de células vizinhas se sobreponham e pareçam mais grossas
+// (efeito "negrito") nas linhas internas.
 export function Celula({
   span,
   className = "",
@@ -11,9 +15,23 @@ export function Celula({
 }) {
   return (
     <div
-      className={`border border-black px-2 py-1 ${className}`}
+      className={`border-r border-b border-black px-2 py-1 ${className}`}
       style={{ gridColumn: `span ${span} / span ${span}` }}
     >
+      {children}
+    </div>
+  );
+}
+
+export function TabelaGrid({
+  className = "",
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`grid grid-cols-12 border-t border-l border-black ${className}`}>
       {children}
     </div>
   );

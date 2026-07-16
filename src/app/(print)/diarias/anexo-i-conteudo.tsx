@@ -1,4 +1,4 @@
-import { Celula, headerCell, PaginaA4 } from "../celula";
+import { Celula, headerCell, PaginaA4, TabelaGrid } from "../celula";
 import { formatarData, formatarMoeda } from "@/lib/pdf/formato";
 
 type Solicitacao = {
@@ -62,7 +62,7 @@ export function AnexoIConteudo({
           ANEXO II da Resolução nº 040 de 04 de abril de 2023
         </p>
 
-        <div className="mt-4 grid grid-cols-12">
+        <TabelaGrid className="mt-4">
           <Celula span={12} className={`${headerCell} text-[10pt]`}>
             SOLICITAÇÃO DE RECURSOS PARA VIAGEM – Diária nº {solicitacao.numero_diaria ?? ""}
           </Celula>
@@ -172,7 +172,7 @@ export function AnexoIConteudo({
               Assinatura do ordenador da despesa
             </div>
           </Celula>
-        </div>
+        </TabelaGrid>
       </div>
     </PaginaA4>
   );
