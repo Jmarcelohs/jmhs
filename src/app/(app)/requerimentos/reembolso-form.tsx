@@ -22,6 +22,7 @@ function cargoDeclaradoPadrao(categoria?: Categoria): CargoDeclarado {
 }
 
 export type ValoresIniciaisReembolso = {
+  protocolo: string;
   pessoa_id: string;
   cargo_declarado: CargoDeclarado;
   subassunto: SubassuntoReembolso;
@@ -103,6 +104,21 @@ export function ReembolsoForm({
       <input type="hidden" name="valor" value={valorNumero} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {valoresIniciais && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Protocolo</label>
+            <input
+              name="protocolo"
+              required
+              defaultValue={valoresIniciais.protocolo}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Gerado automaticamente na criação — só altere se precisar corrigir a numeração.
+            </p>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-slate-700">Solicitante</label>
           {pessoaFixaId ? (

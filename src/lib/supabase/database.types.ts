@@ -328,6 +328,7 @@ export interface Database {
           protocolo: string;
           pessoa_id: string;
           cargo_declarado: CargoDeclarado;
+          cpf: string | null;
           data_requerimento: string;
           subassunto: SubassuntoReembolso;
           data_ida: string;

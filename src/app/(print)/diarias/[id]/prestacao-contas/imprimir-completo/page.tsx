@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "../../../../print-button";
 import { AnexoIConteudo } from "../../../anexo-i-conteudo";
 import { AnexoIIConteudo } from "../../../anexo-ii-conteudo";
+import { RequerimentoConteudo } from "../../../../requerimentos/requerimento-conteudo";
 import { carregarAnexosParaImpressao } from "@/lib/pdf/anexos";
 
 export default async function ImprimirCompletoPage({
@@ -49,6 +50,16 @@ export default async function ImprimirCompletoPage({
   const pessoaPrestacao = prestacao.pessoas as unknown as { nome: string } | null;
   const { fotos, documentos } = await carregarAnexosParaImpressao(supabase, prestacao.id);
 
+  // Requerimentos de reembolso vinculados a essa diária entram em seguida
+  // no mesmo PDF, um por página.
+  const { data: requerimentos } = await supabase
+    .from("requerimentos_reembolso")
+    .select("*, pessoas(nome)")
+    .eq("solicitacao_diaria_id", id)
+    .order("criado_em");
+
+  const temRequerimentos = (requerimentos ?? []).length > 0;
+
   return (
     <>
       <PrintButton
@@ -67,7 +78,17 @@ export default async function ImprimirCompletoPage({
         pessoa={pessoaPrestacao}
         fotos={fotos}
         documentos={documentos}
+        ultimoDocumento={!temRequerimentos}
       />
+      {(requerimentos ?? []).map((requerimento, indice) => (
+        <RequerimentoConteudo
+          key={requerimento.id}
+          requerimento={requerimento}
+          pessoa={requerimento.pessoas as unknown as { nome: string } | null}
+          cpf={requerimento.cpf}
+          quebrarPagina={indice < (requerimentos ?? []).length - 1}
+        />
+      ))}
     </>
   );
 }

@@ -65,6 +65,7 @@ export default async function EditarReembolsoPage({
         pessoaFixaId={requerimento.pessoa_id}
         submitLabel="Salvar alterações"
         valoresIniciais={{
+          protocolo: requerimento.protocolo,
           pessoa_id: requerimento.pessoa_id,
           cargo_declarado: requerimento.cargo_declarado as CargoDeclarado,
           subassunto: requerimento.subassunto as SubassuntoReembolso,

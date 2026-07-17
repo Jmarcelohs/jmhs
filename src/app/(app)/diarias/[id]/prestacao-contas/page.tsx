@@ -160,6 +160,11 @@ export default async function PrestacaoContasPage({
     .eq("prestacao_id", prestacao.id)
     .order("criado_em");
 
+  const { count: totalRequerimentos } = await supabase
+    .from("requerimentos_reembolso")
+    .select("id", { count: "exact", head: true })
+    .eq("solicitacao_diaria_id", id);
+
   const podeAnexar = usuario?.papel === "admin" || minhaPessoa?.id === prestacao.pessoa_id;
 
   const podeAprovarOrdenador =
@@ -199,7 +204,7 @@ export default async function PrestacaoContasPage({
             target="_blank"
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Baixar Anexo I + II
+            {totalRequerimentos ? "Baixar Anexo I + II + Requerimento(s)" : "Baixar Anexo I + II"}
           </Link>
           {podeAnexar && (
             <ExcluirSolicitacaoButton

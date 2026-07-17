@@ -1,6 +1,6 @@
 import { Celula, headerCell, PaginaA4, TabelaGrid } from "../celula";
 import { formatarData, formatarMoeda, valorPorExtenso } from "@/lib/pdf/formato";
-import { FUNDAMENTO_REEMBOLSO, PRESIDENTE_PADRAO, SUBASSUNTO_TITULO } from "@/lib/reembolso/documento";
+import { PRESIDENTE_PADRAO, SUBASSUNTO_TITULO, corpoReembolso } from "@/lib/reembolso/documento";
 import type {
   CargoDeclarado,
   DecisaoRequerimentoReembolso,
@@ -87,14 +87,16 @@ export function RequerimentoConteudo({
           Excelentíssimo Senhor Presidente da Câmara Municipal de Nepomuceno/MG,
         </p>
         <p className="mt-3 text-[9pt] leading-relaxed text-justify">
-          {pessoa?.nome ?? "—"}, {requerimento.cargo_declarado}, portador(a) do CPF nº{" "}
-          {cpf ?? "—"}, vem respeitosamente requerer a Vossa Excelência, com fundamento no{" "}
-          {FUNDAMENTO_REEMBOLSO}, o reembolso de despesas com{" "}
-          {SUBASSUNTO_TITULO[requerimento.subassunto].toLowerCase()}, referentes à viagem ao
-          município de {requerimento.municipio}, realizada no período de{" "}
-          {formatarData(requerimento.data_ida)} a {formatarData(requerimento.data_volta)}, no
-          valor de {formatarMoeda(requerimento.valor)} (
-          {valorPorExtenso(requerimento.valor)}), solicitando o pagamento pelos meios de praxe.
+          {corpoReembolso({
+            nome: pessoa?.nome ?? "",
+            cargoDeclarado: requerimento.cargo_declarado,
+            cpf,
+            subassunto: requerimento.subassunto,
+            dataIda: requerimento.data_ida,
+            dataVolta: requerimento.data_volta,
+            municipio: requerimento.municipio,
+            valor: requerimento.valor,
+          })}
         </p>
 
         <p className="mt-6 text-center text-[9pt]">Termos em que pede deferimento.</p>

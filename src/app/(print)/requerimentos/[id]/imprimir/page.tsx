@@ -19,12 +19,6 @@ export default async function ImprimirReembolsoPage({
 
   if (!requerimento) notFound();
 
-  const { data: sensivel } = await supabase
-    .from("pessoas_dados_sensiveis")
-    .select("cpf")
-    .eq("pessoa_id", requerimento.pessoa_id)
-    .maybeSingle();
-
   const pessoa = requerimento.pessoas as unknown as { nome: string } | null;
 
   return (
@@ -33,7 +27,7 @@ export default async function ImprimirReembolsoPage({
         url={`/api/requerimentos/${id}/pdf`}
         nomeArquivoPadrao={`requerimento-${requerimento.protocolo.replace("/", "-")}.pdf`}
       />
-      <RequerimentoConteudo requerimento={requerimento} pessoa={pessoa} cpf={sensivel?.cpf ?? null} />
+      <RequerimentoConteudo requerimento={requerimento} pessoa={pessoa} cpf={requerimento.cpf} />
     </>
   );
 }

@@ -6,17 +6,17 @@ export const FUNDAMENTO_REEMBOLSO = "Art. 9º, da Resolução nº 40 de 04 de ab
 export const PRESIDENTE_PADRAO = "Tullio Ian Marangoni de Morais";
 
 export const SUBASSUNTO_LABEL: Record<SubassuntoReembolso, string> = {
-  locomocao: "despesas com locomoção",
-  combustivel: "despesas com combustível",
-  passagem_aerea: "despesas com passagem aérea",
-  passagem_onibus: "despesas com passagem de ônibus",
+  locomocao: "locomoção urbana (Uber, táxi e outros)",
+  combustivel: "combustível e estacionamento",
+  passagem_aerea: "passagem aérea",
+  passagem_onibus: "passagem de ônibus",
 };
 
 export const SUBASSUNTO_TITULO: Record<SubassuntoReembolso, string> = {
-  locomocao: "Reembolso de Despesas com Locomoção",
-  combustivel: "Reembolso de Despesas com Combustível",
-  passagem_aerea: "Reembolso de Despesas com Passagem Aérea",
-  passagem_onibus: "Reembolso de Despesas com Passagem de Ônibus",
+  locomocao: "Locomoção Urbana (Uber, Táxi e outros)",
+  combustivel: "Despesas com Combustível e Estacionamento",
+  passagem_aerea: "Passagens Aéreas",
+  passagem_onibus: "Passagens de Ônibus",
 };
 
 export function buildReferenteA(subassunto: SubassuntoReembolso) {

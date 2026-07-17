@@ -38,12 +38,6 @@ export default async function DetalheReembolsoPage({
 
   if (!requerimento) notFound();
 
-  const { data: sensivel } = await supabase
-    .from("pessoas_dados_sensiveis")
-    .select("cpf")
-    .eq("pessoa_id", requerimento.pessoa_id)
-    .maybeSingle();
-
   const { data: minhaPessoa } = usuario
     ? await supabase.from("pessoas").select("id").eq("usuario_id", usuario.id).maybeSingle()
     : { data: null };
@@ -63,7 +57,7 @@ export default async function DetalheReembolsoPage({
   const corpo = corpoReembolso({
     nome: pessoa?.nome ?? "",
     cargoDeclarado: requerimento.cargo_declarado,
-    cpf: sensivel?.cpf ?? null,
+    cpf: requerimento.cpf,
     subassunto: requerimento.subassunto as SubassuntoReembolso,
     dataIda: requerimento.data_ida,
     dataVolta: requerimento.data_volta,
@@ -116,7 +110,7 @@ export default async function DetalheReembolsoPage({
         </div>
         <div>
           <dt className="text-slate-500">CPF</dt>
-          <dd className="text-slate-900">{sensivel?.cpf ?? "—"}</dd>
+          <dd className="text-slate-900">{requerimento.cpf ?? "—"}</dd>
         </div>
         <div>
           <dt className="text-slate-500">Data do requerimento</dt>
@@ -140,7 +134,15 @@ export default async function DetalheReembolsoPage({
           <div className="sm:col-span-2">
             <dt className="text-slate-500">Diária vinculada</dt>
             <dd className="text-slate-900">
-              Diária {diaria.numero_diaria ?? "s/ nº"} — {diaria.municipio_destino ?? "—"}
+              <Link
+                href={`/diarias/${requerimento.solicitacao_diaria_id}/prestacao-contas`}
+                className="hover:underline"
+              >
+                Diária {diaria.numero_diaria ?? "s/ nº"} — {diaria.municipio_destino ?? "—"}
+              </Link>
+              <span className="ml-2 text-xs text-slate-500">
+                (entra automaticamente no PDF combinado da prestação de contas dessa diária)
+              </span>
             </dd>
           </div>
         )}

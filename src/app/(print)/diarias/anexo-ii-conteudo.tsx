@@ -44,12 +44,16 @@ export function AnexoIIConteudo({
   pessoa,
   fotos = [],
   documentos = [],
+  ultimoDocumento = true,
 }: {
   prestacao: Prestacao;
   pagamentos: Pagamento[];
   pessoa: Pessoa;
   fotos?: Foto[];
   documentos?: Documento[];
+  // false quando há mais páginas depois (ex.: requerimento de reembolso
+  // vinculado) — força a quebra de página após a última página de fotos.
+  ultimoDocumento?: boolean;
 }) {
   const FOTOS_POR_PAGINA = 2;
   const paginasDeFotos: Foto[][] =
@@ -240,7 +244,7 @@ export function AnexoIIConteudo({
       {paginasDeFotos.map((grupo, indice) => {
         const ultimaPagina = indice === paginasDeFotos.length - 1;
         return (
-          <PaginaA4 key={indice} quebrarPagina={!ultimaPagina}>
+          <PaginaA4 key={indice} quebrarPagina={!ultimaPagina || !ultimoDocumento}>
             <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
               <TabelaGrid>
                 <Celula span={12} className={`${headerCell} text-[10pt]`}>

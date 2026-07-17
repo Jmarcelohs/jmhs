@@ -51,12 +51,21 @@ export async function criarReembolso(formData: FormData) {
 
   const protocolo = `${String(protocoloNumero).padStart(3, "0")}/${ano}`;
 
+  // Snapshot do CPF no momento da criação — fica estável mesmo que o CPF
+  // cadastrado da pessoa seja corrigido depois (ver migration 0007).
+  const { data: sensivel } = await supabase
+    .from("pessoas_dados_sensiveis")
+    .select("cpf")
+    .eq("pessoa_id", pessoa_id)
+    .maybeSingle();
+
   const { data: requerimento, error } = await supabase
     .from("requerimentos_reembolso")
     .insert({
       protocolo,
       pessoa_id,
       cargo_declarado,
+      cpf: sensivel?.cpf ?? null,
       data_requerimento: hoje(),
       subassunto,
       data_ida,
@@ -82,6 +91,7 @@ export async function criarReembolso(formData: FormData) {
 export async function editarReembolso(id: string, formData: FormData) {
   const supabase = await createClient();
 
+  const protocolo = String(formData.get("protocolo") ?? "").trim();
   const cargo_declarado = String(formData.get("cargo_declarado") ?? "") as CargoDeclarado;
   const subassunto = String(formData.get("subassunto") ?? "") as SubassuntoReembolso;
   const data_ida = String(formData.get("data_ida") ?? "");
@@ -90,9 +100,14 @@ export async function editarReembolso(id: string, formData: FormData) {
   const valor = Number(formData.get("valor") ?? 0);
   const solicitacao_diaria_id = String(formData.get("solicitacao_diaria_id") ?? "") || null;
 
+  if (!protocolo) {
+    redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent("Informe o protocolo")}`);
+  }
+
   const { error } = await supabase
     .from("requerimentos_reembolso")
     .update({
+      protocolo,
       cargo_declarado,
       subassunto,
       data_ida,
@@ -104,7 +119,11 @@ export async function editarReembolso(id: string, formData: FormData) {
     .eq("id", id);
 
   if (error) {
-    redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent(error.message)}`);
+    // Violação do "unique" de protocolo é o caso mais comum de erro aqui.
+    const mensagem = error.message.includes("duplicate key")
+      ? `Já existe um requerimento com o protocolo "${protocolo}". Escolha outro número.`
+      : error.message;
+    redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent(mensagem)}`);
   }
 
   revalidatePath(`/requerimentos/${id}`);
