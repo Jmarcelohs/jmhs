@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: "/pessoas", label: "Pessoas" },
 ];
 
+const NAV_ITEM_ADMIN = { href: "/usuarios", label: "Usuários" };
+
 export default async function AppLayout({
   children,
 }: {
@@ -35,15 +37,17 @@ export default async function AppLayout({
               />
             </Link>
             <nav className="flex flex-wrap gap-1">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-brand-navy/5 hover:text-brand-navy"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {[...NAV_ITEMS, ...(usuario?.papel === "admin" ? [NAV_ITEM_ADMIN] : [])].map(
+                (item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-brand-navy/5 hover:text-brand-navy"
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3">

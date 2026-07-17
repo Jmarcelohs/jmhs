@@ -56,8 +56,11 @@ O Supabase Auth guarda usuários em `auth.users`; a tabela `usuarios` deste proj
    where matricula = '1106';
    ```
 
-Repita para os demais papéis (`servidor`, `ordenador_despesa`, `tesoureiro`, `controle_interno`)
-conforme forem sendo necessários — ver seção 5 da especificação para o que cada papel pode fazer.
+Isso é só para o **primeiro admin** (ainda não existe ninguém logado pra usar a tela). A partir
+daí, todos os demais usuários (`servidor`, `ordenador_despesa`, `tesoureiro`, `controle_interno`
+ou outro `admin`) são criados direto pelo menu **Usuários** do próprio sistema — não precisa mais
+mexer no SQL Editor nem no painel de Authentication. Ver seção 5 da especificação para o que cada
+papel pode fazer.
 
 ## 5. Rodar localmente
 
@@ -133,9 +136,13 @@ supabase/
   vínculo opcional a uma diária de viagem — quando autorizado, o valor soma automaticamente no
   demonstrativo financeiro (Anexo II) da diária vinculada ao prestar contas —, decisão do
   ordenador da despesa (autorizar/não autorizar/em análise) e PDF no layout oficial.
+- Gestão de Usuários pela interface (só admin, menu "Usuários"): criar login (Supabase Auth) +
+  papel + vínculo com o cadastro de pessoas num só formulário, editar, redefinir senha,
+  inativar/reativar e excluir — sem precisar mais do SQL Editor no dia a dia. Inativar um
+  usuário agora realmente revoga o acesso dele (RLS passou a checar `usuarios.ativo`, o que
+  não acontecia antes).
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
-- CRUD/gestão de Usuários e papéis pela interface (hoje só via SQL Editor).
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
 - Módulos de Emendas Impositivas e Veículos (só o schema existe).

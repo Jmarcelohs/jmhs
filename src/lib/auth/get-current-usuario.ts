@@ -12,7 +12,8 @@ export async function getCurrentUsuario() {
     .from("usuarios")
     .select("id, nome, email, papel, ativo")
     .eq("auth_user_id", user.id)
-    .single();
+    .eq("ativo", true)
+    .maybeSingle();
 
   return usuario;
 }
