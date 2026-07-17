@@ -8,6 +8,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Cores do timbrado oficial da Câmara Municipal de Nepomuceno. */
+  --color-brand-green: #6fa873;
+  --color-brand-green-dark: #3f6b44;
+  --color-brand-navy: #0b2c3f;
+  --color-brand-navy-light: #163c52;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

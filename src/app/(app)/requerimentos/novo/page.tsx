@@ -28,7 +28,7 @@ export default async function NovoReembolsoPage({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">Novo requerimento de reembolso</h1>
+      <h1 className="text-xl font-semibold text-brand-navy">Novo requerimento de reembolso</h1>
       <p className="mt-1 text-sm text-slate-500">
         Reembolso de Despesas — Art. 9º, da Resolução nº 40 de 04 de abril de 2023.
       </p>

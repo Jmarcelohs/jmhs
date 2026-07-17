@@ -52,10 +52,10 @@ export default async function DiariasPage({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Diárias de Viagem</h1>
+        <h1 className="text-xl font-semibold text-brand-navy">Diárias de Viagem</h1>
         <Link
           href="/diarias/nova"
-          className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-md bg-brand-navy px-3 py-2 text-sm font-medium text-white hover:bg-brand-navy-light"
         >
           Nova solicitação
         </Link>
@@ -66,27 +66,27 @@ export default async function DiariasPage({
           <Link
             key={s}
             href={`/diarias?status=${s}`}
-            className={`rounded-full px-3 py-1 ${status === s && !prestacao ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+            className={`rounded-full px-3 py-1 ${status === s && !prestacao ? "bg-brand-navy text-white" : "bg-slate-100 text-slate-600"}`}
           >
             {s}
           </Link>
         ))}
         <Link
           href="/diarias"
-          className={`rounded-full px-3 py-1 ${!status && !prestacao ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+          className={`rounded-full px-3 py-1 ${!status && !prestacao ? "bg-brand-navy text-white" : "bg-slate-100 text-slate-600"}`}
         >
           Todas
         </Link>
         <span className="mx-1 self-center text-slate-300">|</span>
         <Link
           href="/diarias?prestacao=pendente"
-          className={`rounded-full px-3 py-1 ${prestacao === "pendente" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+          className={`rounded-full px-3 py-1 ${prestacao === "pendente" ? "bg-brand-navy text-white" : "bg-slate-100 text-slate-600"}`}
         >
           Prestação de contas pendente
         </Link>
         <Link
           href="/diarias?prestacao=realizada"
-          className={`rounded-full px-3 py-1 ${prestacao === "realizada" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"}`}
+          className={`rounded-full px-3 py-1 ${prestacao === "realizada" ? "bg-brand-navy text-white" : "bg-slate-100 text-slate-600"}`}
         >
           Prestação de contas realizada
         </Link>
@@ -103,7 +103,7 @@ export default async function DiariasPage({
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
+          <thead className="bg-brand-navy/5">
             <tr>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Solicitante</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Destino</th>

@@ -98,7 +98,7 @@ export default async function DetalheSolicitacaoPage({
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-xl font-semibold text-brand-navy">
             Solicitação de {pessoa?.nome ?? "—"}
           </h1>
           <p className="text-sm text-slate-500">{pessoa?.cargo}</p>
@@ -169,7 +169,7 @@ export default async function DetalheSolicitacaoPage({
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
+          <thead className="bg-brand-navy/5">
             <tr>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Item</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Qtd.</th>

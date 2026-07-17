@@ -55,7 +55,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-brand-navy">
         Olá, {usuario?.nome ?? "usuário"}
       </h1>
       <p className="mt-1 text-sm text-slate-500">
@@ -63,21 +63,21 @@ export default async function DashboardPage() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 border-t-4 border-t-amber-500 bg-white p-4">
           <p className="text-sm text-slate-500">Diárias pendentes de autorização</p>
           <p className="mt-2 text-2xl font-semibold text-amber-600">{solicitadas}</p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 border-t-4 border-t-emerald-500 bg-white p-4">
           <p className="text-sm text-slate-500">Diárias autorizadas</p>
           <p className="mt-2 text-2xl font-semibold text-emerald-600">{autorizadas}</p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 border-t-4 border-t-red-500 bg-white p-4">
           <p className="text-sm text-slate-500">Diárias indeferidas</p>
           <p className="mt-2 text-2xl font-semibold text-red-600">{indeferidas}</p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 border-t-4 border-t-brand-green bg-white p-4">
           <p className="text-sm text-slate-500">Valor total autorizado</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">
+          <p className="mt-2 text-2xl font-semibold text-brand-navy">
             {formatarMoeda(valorAutorizado)}
           </p>
         </div>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
       <h2 className="mt-8 text-base font-semibold text-slate-900">Diárias por solicitante</h2>
       <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
+          <thead className="bg-brand-navy/5">
             <tr>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Solicitante</th>
               <th className="px-4 py-2 text-left font-medium text-slate-500">Total de diárias</th>

@@ -20,7 +20,7 @@ export default async function NovaSolicitacaoPage({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-brand-navy">
         Nova solicitação de diária (Anexo I)
       </h1>
       <p className="mt-1 text-sm text-slate-500">

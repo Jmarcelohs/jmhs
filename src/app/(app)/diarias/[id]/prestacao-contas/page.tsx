@@ -88,7 +88,7 @@ export default async function PrestacaoContasPage({
     if (solicitacao.status !== "Autorizado") {
       return (
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Prestação de contas</h1>
+          <h1 className="text-xl font-semibold text-brand-navy">Prestação de contas</h1>
           <p className="mt-2 text-sm text-slate-500">
             Só é possível prestar contas de uma diária já autorizada. Status atual:{" "}
             {solicitacao.status}.
@@ -100,7 +100,7 @@ export default async function PrestacaoContasPage({
     if (!podeCriar) {
       return (
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Prestação de contas</h1>
+          <h1 className="text-xl font-semibold text-brand-navy">Prestação de contas</h1>
           <p className="mt-2 text-sm text-slate-500">
             Você não tem permissão para prestar contas desta diária.
           </p>
@@ -110,7 +110,7 @@ export default async function PrestacaoContasPage({
 
     return (
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-brand-navy">
           Prestação de contas — {pessoaSolicitacao?.nome ?? "—"}
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -178,7 +178,7 @@ export default async function PrestacaoContasPage({
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-xl font-semibold text-brand-navy">
             Prestação de contas — {pessoa?.nome ?? "—"}
           </h1>
           <p className="text-sm text-slate-500">{pessoa?.cargo}</p>
@@ -202,7 +202,7 @@ export default async function PrestacaoContasPage({
           <Link
             href={`/diarias/${id}/prestacao-contas/imprimir-completo`}
             target="_blank"
-            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-md bg-brand-navy px-3 py-2 text-sm font-medium text-white hover:bg-brand-navy-light"
           >
             {totalRequerimentos ? "Baixar Anexo I + II + Requerimento(s)" : "Baixar Anexo I + II"}
           </Link>
@@ -404,7 +404,7 @@ export default async function PrestacaoContasPage({
             </div>
             <button
               type="submit"
-              className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-md bg-brand-navy px-3 py-2 text-sm font-medium text-white hover:bg-brand-navy-light"
             >
               Emitir parecer
             </button>

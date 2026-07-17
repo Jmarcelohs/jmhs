@@ -69,7 +69,7 @@ export default async function DetalheReembolsoPage({
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-xl font-semibold text-brand-navy">
             Requerimento {requerimento.protocolo} — {pessoa?.nome ?? "—"}
           </h1>
           <p className="text-sm text-slate-500">

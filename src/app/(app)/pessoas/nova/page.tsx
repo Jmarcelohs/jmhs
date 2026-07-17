@@ -14,7 +14,7 @@ export default async function NovaPessoaPage({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">Nova pessoa</h1>
+      <h1 className="text-xl font-semibold text-brand-navy">Nova pessoa</h1>
       <p className="mt-1 text-sm text-slate-500">
         Cadastro único de servidores e vereadores, compartilhado entre todos os módulos.
       </p>

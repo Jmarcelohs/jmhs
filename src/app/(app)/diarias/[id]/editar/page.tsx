@@ -53,7 +53,7 @@ export default async function EditarSolicitacaoPage({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-brand-navy">
         Editar solicitação de {pessoa?.nome ?? "—"}
       </h1>
       <p className="mt-1 text-sm text-slate-500">
