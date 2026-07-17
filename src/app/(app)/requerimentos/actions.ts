@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUsuario } from "@/lib/auth/get-current-usuario";
+import { apenasDigitos } from "@/lib/reembolso/mascaras";
 import type { CargoDeclarado, SubassuntoReembolso } from "@/lib/supabase/database.types";
 
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -12,8 +13,10 @@ export async function criarReembolso(formData: FormData) {
   const usuario = await getCurrentUsuario();
   if (!usuario) redirect("/login");
 
+  const protocoloManual = String(formData.get("protocolo") ?? "").trim();
   const pessoa_id = String(formData.get("pessoa_id") ?? "");
   const cargo_declarado = String(formData.get("cargo_declarado") ?? "") as CargoDeclarado;
+  const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
   const subassunto = String(formData.get("subassunto") ?? "") as SubassuntoReembolso;
   const data_ida = String(formData.get("data_ida") ?? "") || null;
   const data_volta = String(formData.get("data_volta") ?? "") || null;
@@ -37,27 +40,24 @@ export async function criarReembolso(formData: FormData) {
 
   const supabase = await createClient();
 
-  const ano = new Date().getFullYear();
-  const { data: protocoloNumero, error: protocoloError } = await supabase.rpc(
-    "proximo_protocolo_requerimento",
-    { p_ano: ano },
-  );
-
-  if (protocoloError || protocoloNumero == null) {
-    redirect(
-      `/requerimentos/novo?error=${encodeURIComponent(protocoloError?.message ?? "Erro ao gerar o protocolo")}`,
+  // Protocolo: se foi digitado manualmente, usa esse número; senão gera o
+  // próximo da sequência do ano corrente.
+  let protocolo = protocoloManual;
+  if (!protocolo) {
+    const ano = new Date().getFullYear();
+    const { data: protocoloNumero, error: protocoloError } = await supabase.rpc(
+      "proximo_protocolo_requerimento",
+      { p_ano: ano },
     );
+
+    if (protocoloError || protocoloNumero == null) {
+      redirect(
+        `/requerimentos/novo?error=${encodeURIComponent(protocoloError?.message ?? "Erro ao gerar o protocolo")}`,
+      );
+    }
+
+    protocolo = `${String(protocoloNumero).padStart(3, "0")}/${ano}`;
   }
-
-  const protocolo = `${String(protocoloNumero).padStart(3, "0")}/${ano}`;
-
-  // Snapshot do CPF no momento da criação — fica estável mesmo que o CPF
-  // cadastrado da pessoa seja corrigido depois (ver migration 0007).
-  const { data: sensivel } = await supabase
-    .from("pessoas_dados_sensiveis")
-    .select("cpf")
-    .eq("pessoa_id", pessoa_id)
-    .maybeSingle();
 
   const { data: requerimento, error } = await supabase
     .from("requerimentos_reembolso")
@@ -65,7 +65,7 @@ export async function criarReembolso(formData: FormData) {
       protocolo,
       pessoa_id,
       cargo_declarado,
-      cpf: sensivel?.cpf ?? null,
+      cpf,
       data_requerimento: hoje(),
       subassunto,
       data_ida,
@@ -79,9 +79,12 @@ export async function criarReembolso(formData: FormData) {
     .single();
 
   if (error || !requerimento) {
-    redirect(
-      `/requerimentos/novo?error=${encodeURIComponent(error?.message ?? "Erro ao salvar o requerimento")}`,
-    );
+    // Violação do "unique" de protocolo é o caso mais comum aqui, já que
+    // agora dá pra digitar o número manualmente.
+    const mensagem = error?.message.includes("duplicate key")
+      ? `Já existe um requerimento com o protocolo "${protocolo}". Escolha outro número.`
+      : (error?.message ?? "Erro ao salvar o requerimento");
+    redirect(`/requerimentos/novo?error=${encodeURIComponent(mensagem)}`);
   }
 
   revalidatePath("/requerimentos");
@@ -93,6 +96,7 @@ export async function editarReembolso(id: string, formData: FormData) {
 
   const protocolo = String(formData.get("protocolo") ?? "").trim();
   const cargo_declarado = String(formData.get("cargo_declarado") ?? "") as CargoDeclarado;
+  const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
   const subassunto = String(formData.get("subassunto") ?? "") as SubassuntoReembolso;
   const data_ida = String(formData.get("data_ida") ?? "");
   const data_volta = String(formData.get("data_volta") ?? "");
@@ -109,6 +113,7 @@ export async function editarReembolso(id: string, formData: FormData) {
     .update({
       protocolo,
       cargo_declarado,
+      cpf,
       subassunto,
       data_ida,
       data_volta,

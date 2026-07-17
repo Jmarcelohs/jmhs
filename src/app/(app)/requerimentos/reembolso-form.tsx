@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatarValorDigitado } from "@/lib/reembolso/mascaras";
+import { formatarCpfDigitado, formatarValorDigitado } from "@/lib/reembolso/mascaras";
 import { corpoReembolso, buildReferenteA, SUBASSUNTO_TITULO } from "@/lib/reembolso/documento";
 import type { CargoDeclarado, Categoria, SubassuntoReembolso } from "@/lib/supabase/database.types";
 
@@ -25,6 +25,7 @@ export type ValoresIniciaisReembolso = {
   protocolo: string;
   pessoa_id: string;
   cargo_declarado: CargoDeclarado;
+  cpf: string;
   subassunto: SubassuntoReembolso;
   data_ida: string;
   data_volta: string;
@@ -57,6 +58,9 @@ export function ReembolsoForm({
   const [subassunto, setSubassunto] = useState<SubassuntoReembolso>(
     valoresIniciais?.subassunto ?? "locomocao",
   );
+  const [cpf, setCpf] = useState(
+    formatarCpfDigitado(valoresIniciais?.cpf ?? pessoaSelecionada?.cpf ?? ""),
+  );
   const [dataIda, setDataIda] = useState(valoresIniciais?.data_ida ?? "");
   const [dataVolta, setDataVolta] = useState(valoresIniciais?.data_volta ?? "");
   const [municipio, setMunicipio] = useState(valoresIniciais?.municipio ?? "");
@@ -79,6 +83,7 @@ export function ReembolsoForm({
     setPessoaId(id);
     const pessoa = pessoas.find((p) => p.id === id);
     setCargoDeclarado(cargoDeclaradoPadrao(pessoa?.categoria));
+    setCpf(formatarCpfDigitado(pessoa?.cpf ?? ""));
     setSolicitacaoDiariaId("");
   }
 
@@ -91,7 +96,7 @@ export function ReembolsoForm({
   const previa = corpoReembolso({
     nome: pessoaSelecionada?.nome ?? "",
     cargoDeclarado,
-    cpf: pessoaSelecionada?.cpf ?? null,
+    cpf: cpf || null,
     subassunto,
     dataIda: dataIda || null,
     dataVolta: dataVolta || null,
@@ -104,20 +109,21 @@ export function ReembolsoForm({
       <input type="hidden" name="valor" value={valorNumero} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {valoresIniciais && (
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Protocolo</label>
-            <input
-              name="protocolo"
-              required
-              defaultValue={valoresIniciais.protocolo}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              Gerado automaticamente na criação — só altere se precisar corrigir a numeração.
-            </p>
-          </div>
-        )}
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Protocolo</label>
+          <input
+            name="protocolo"
+            required={Boolean(valoresIniciais)}
+            defaultValue={valoresIniciais?.protocolo ?? ""}
+            placeholder={valoresIniciais ? undefined : "Deixe em branco para gerar automaticamente"}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            {valoresIniciais
+              ? "Gerado automaticamente na criação — só altere se precisar corrigir a numeração."
+              : "Deixe em branco para gerar automaticamente (sequencial por ano) ou digite o número manualmente."}
+          </p>
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-slate-700">Solicitante</label>
@@ -145,10 +151,23 @@ export function ReembolsoForm({
             </select>
           )}
           {pessoaSelecionada && (
-            <p className="mt-1 text-xs text-slate-500">
-              {pessoaSelecionada.cargo} — CPF: {pessoaSelecionada.cpf ?? "não cadastrado"}
-            </p>
+            <p className="mt-1 text-xs text-slate-500">{pessoaSelecionada.cargo}</p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">CPF do solicitante</label>
+          <input
+            name="cpf"
+            inputMode="numeric"
+            value={cpf}
+            onChange={(e) => setCpf(formatarCpfDigitado(e.target.value))}
+            placeholder="000.000.000-00"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Preenchido do cadastro da pessoa — ajuste aqui se estiver errado ou não cadastrado.
+          </p>
         </div>
 
         <div>

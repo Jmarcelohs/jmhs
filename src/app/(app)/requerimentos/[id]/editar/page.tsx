@@ -68,6 +68,7 @@ export default async function EditarReembolsoPage({
           protocolo: requerimento.protocolo,
           pessoa_id: requerimento.pessoa_id,
           cargo_declarado: requerimento.cargo_declarado as CargoDeclarado,
+          cpf: requerimento.cpf ?? "",
           subassunto: requerimento.subassunto as SubassuntoReembolso,
           data_ida: requerimento.data_ida,
           data_volta: requerimento.data_volta,
