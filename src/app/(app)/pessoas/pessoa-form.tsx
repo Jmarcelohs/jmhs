@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import { formatarCpfDigitado } from "@/lib/reembolso/mascaras";
+
 export type ValoresIniciaisPessoa = {
   matricula: string;
   nome: string;
   cargo: string;
   categoria: string;
+  cpf: string;
 };
 
 export function PessoaForm({
@@ -16,6 +20,8 @@ export function PessoaForm({
   valoresIniciais?: ValoresIniciaisPessoa;
   submitLabel: string;
 }) {
+  const [cpf, setCpf] = useState(formatarCpfDigitado(valoresIniciais?.cpf ?? ""));
+
   return (
     <form action={action} className="mt-6 max-w-lg space-y-4">
       <div>
@@ -26,6 +32,21 @@ export function PessoaForm({
           placeholder="ex.: 1106 (deixe em branco se não houver)"
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-slate-700">CPF</label>
+        <input
+          name="cpf"
+          value={cpf}
+          onChange={(e) => setCpf(formatarCpfDigitado(e.target.value))}
+          placeholder="000.000.000-00"
+          inputMode="numeric"
+          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Dado sensível (LGPD): visível só para admin/ordenador da despesa e para a própria
+          pessoa. Usado nos requerimentos de reembolso.
+        </p>
       </div>
       <div>
         <label className="block text-sm font-medium text-slate-700">Nome</label>

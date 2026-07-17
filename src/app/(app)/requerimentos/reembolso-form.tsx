@@ -1,0 +1,257 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { formatarValorDigitado } from "@/lib/reembolso/mascaras";
+import { corpoReembolso, buildReferenteA, SUBASSUNTO_TITULO } from "@/lib/reembolso/documento";
+import type { CargoDeclarado, Categoria, SubassuntoReembolso } from "@/lib/supabase/database.types";
+
+type Pessoa = { id: string; nome: string; cargo: string; categoria: Categoria; cpf: string | null };
+type Diaria = { id: string; pessoa_id: string; numero_diaria: string | null; municipio_destino: string | null };
+
+const SUBASSUNTOS: SubassuntoReembolso[] = [
+  "locomocao",
+  "combustivel",
+  "passagem_aerea",
+  "passagem_onibus",
+];
+
+const CARGOS_DECLARADOS: CargoDeclarado[] = ["Vereador(a)", "Servidor(a)", "Estagiário(a)"];
+
+function cargoDeclaradoPadrao(categoria?: Categoria): CargoDeclarado {
+  return categoria === "Vereador" ? "Vereador(a)" : "Servidor(a)";
+}
+
+export type ValoresIniciaisReembolso = {
+  pessoa_id: string;
+  cargo_declarado: CargoDeclarado;
+  subassunto: SubassuntoReembolso;
+  data_ida: string;
+  data_volta: string;
+  municipio: string;
+  valor: number;
+  solicitacao_diaria_id: string;
+};
+
+export function ReembolsoForm({
+  action,
+  pessoas,
+  diarias,
+  pessoaFixaId,
+  valoresIniciais,
+  submitLabel = "Enviar requerimento",
+}: {
+  action: (formData: FormData) => void;
+  pessoas: Pessoa[];
+  diarias: Diaria[];
+  pessoaFixaId?: string;
+  valoresIniciais?: ValoresIniciaisReembolso;
+  submitLabel?: string;
+}) {
+  const [pessoaId, setPessoaId] = useState(pessoaFixaId ?? valoresIniciais?.pessoa_id ?? "");
+  const pessoaSelecionada = pessoas.find((p) => p.id === pessoaId);
+
+  const [cargoDeclarado, setCargoDeclarado] = useState<CargoDeclarado>(
+    valoresIniciais?.cargo_declarado ?? cargoDeclaradoPadrao(pessoaSelecionada?.categoria),
+  );
+  const [subassunto, setSubassunto] = useState<SubassuntoReembolso>(
+    valoresIniciais?.subassunto ?? "locomocao",
+  );
+  const [dataIda, setDataIda] = useState(valoresIniciais?.data_ida ?? "");
+  const [dataVolta, setDataVolta] = useState(valoresIniciais?.data_volta ?? "");
+  const [municipio, setMunicipio] = useState(valoresIniciais?.municipio ?? "");
+  const [solicitacaoDiariaId, setSolicitacaoDiariaId] = useState(
+    valoresIniciais?.solicitacao_diaria_id ?? "",
+  );
+
+  const valorInicialTexto = valoresIniciais?.valor
+    ? valoresIniciais.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+    : "";
+  const [valorTexto, setValorTexto] = useState(valorInicialTexto);
+  const [valorNumero, setValorNumero] = useState(valoresIniciais?.valor ?? 0);
+
+  const diariasDaPessoa = useMemo(
+    () => diarias.filter((d) => d.pessoa_id === pessoaId),
+    [diarias, pessoaId],
+  );
+
+  function handlePessoaChange(id: string) {
+    setPessoaId(id);
+    const pessoa = pessoas.find((p) => p.id === id);
+    setCargoDeclarado(cargoDeclaradoPadrao(pessoa?.categoria));
+    setSolicitacaoDiariaId("");
+  }
+
+  function handleValorChange(texto: string) {
+    const { texto: formatado, valor } = formatarValorDigitado(texto);
+    setValorTexto(formatado);
+    setValorNumero(valor);
+  }
+
+  const previa = corpoReembolso({
+    nome: pessoaSelecionada?.nome ?? "",
+    cargoDeclarado,
+    cpf: pessoaSelecionada?.cpf ?? null,
+    subassunto,
+    dataIda: dataIda || null,
+    dataVolta: dataVolta || null,
+    municipio,
+    valor: valorNumero,
+  });
+
+  return (
+    <form action={action} className="mt-6 space-y-6">
+      <input type="hidden" name="valor" value={valorNumero} />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Solicitante</label>
+          {pessoaFixaId ? (
+            <>
+              <input type="hidden" name="pessoa_id" value={pessoaFixaId} />
+              <p className="mt-1 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
+                {pessoaSelecionada?.nome} ({pessoaSelecionada?.categoria})
+              </p>
+            </>
+          ) : (
+            <select
+              name="pessoa_id"
+              required
+              value={pessoaId}
+              onChange={(e) => handlePessoaChange(e.target.value)}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="">Selecione…</option>
+              {pessoas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome} ({p.categoria})
+                </option>
+              ))}
+            </select>
+          )}
+          {pessoaSelecionada && (
+            <p className="mt-1 text-xs text-slate-500">
+              {pessoaSelecionada.cargo} — CPF: {pessoaSelecionada.cpf ?? "não cadastrado"}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Cargo declarado</label>
+          <select
+            name="cargo_declarado"
+            required
+            value={cargoDeclarado}
+            onChange={(e) => setCargoDeclarado(e.target.value as CargoDeclarado)}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            {CARGOS_DECLARADOS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Sub-assunto</label>
+          <select
+            name="subassunto"
+            required
+            value={subassunto}
+            onChange={(e) => setSubassunto(e.target.value as SubassuntoReembolso)}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            {SUBASSUNTOS.map((s) => (
+              <option key={s} value={s}>
+                {SUBASSUNTO_TITULO[s]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Valor (R$)</label>
+          <input
+            inputMode="numeric"
+            value={valorTexto}
+            onChange={(e) => handleValorChange(e.target.value)}
+            placeholder="R$ 0,00"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Data de ida</label>
+          <input
+            type="date"
+            name="data_ida"
+            required
+            value={dataIda}
+            onChange={(e) => setDataIda(e.target.value)}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Data de volta</label>
+          <input
+            type="date"
+            name="data_volta"
+            required
+            value={dataVolta}
+            onChange={(e) => setDataVolta(e.target.value)}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-slate-700">Município</label>
+          <input
+            name="municipio"
+            required
+            value={municipio}
+            onChange={(e) => setMunicipio(e.target.value)}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-slate-700">
+            Vincular a uma diária de viagem (opcional)
+          </label>
+          <select
+            name="solicitacao_diaria_id"
+            value={solicitacaoDiariaId}
+            onChange={(e) => setSolicitacaoDiariaId(e.target.value)}
+            disabled={!pessoaId}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+          >
+            <option value="">Nenhuma</option>
+            {diariasDaPessoa.map((d) => (
+              <option key={d.id} value={d.id}>
+                Diária {d.numero_diaria ?? "s/ nº"} — {d.municipio_destino ?? "—"}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-slate-500">
+            Se autorizado, o valor entra automaticamente no demonstrativo financeiro (Anexo II)
+            dessa diária ao prestar contas.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="text-xs font-semibold uppercase text-slate-500">Prévia do requerimento</p>
+        <p className="mt-2 text-sm font-medium text-slate-700">{buildReferenteA(subassunto)}</p>
+        <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{previa}</p>
+      </div>
+
+      <button
+        type="submit"
+        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+      >
+        {submitLabel}
+      </button>
+    </form>
+  );
+}

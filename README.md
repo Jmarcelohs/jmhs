@@ -128,12 +128,17 @@ supabase/
 - Verificações informativas do art. 4º (prazo de 2 dias úteis, faixa "até 60 km", pendência
   de prestação de contas anterior) na página da solicitação antes de autorizar — nunca
   bloqueiam, só avisam. Dotação orçamentária continua manual (não há módulo de orçamento).
+- Requerimento de Reembolso de Despesas (Art. 9º da Resolução 40/2023): protocolo sequencial
+  por ano, prévia ao vivo do texto do requerimento (com valor por extenso em português),
+  vínculo opcional a uma diária de viagem — quando autorizado, o valor soma automaticamente no
+  demonstrativo financeiro (Anexo II) da diária vinculada ao prestar contas —, decisão do
+  ordenador da despesa (autorizar/não autorizar/em análise) e PDF no layout oficial.
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
 - CRUD/gestão de Usuários e papéis pela interface (hoje só via SQL Editor).
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
-- Módulos de Requerimentos, Emendas Impositivas e Veículos (só o schema existe).
+- Módulos de Emendas Impositivas e Veículos (só o schema existe).
 - Decisão de hospedagem: Vercel (frontend) + Supabase (banco), região São Paulo (`gru1`,
   ver `vercel.json`) — ainda falta confirmar com o jurídico/TI da Câmara se há exigência formal
   de hospedagem em território nacional (seção 10 da especificação). Política de backup também
@@ -193,8 +198,15 @@ pequeno e commite) ou usar **Deployments → (⋯) do último deploy → Redeplo
 
 ## 9. Aviso de segurança / LGPD
 
-Nenhuma tabela armazena CPF. A tabela `usuarios` usa a `anon key` pública do Supabase no
-navegador — por isso **toda tabela tem Row Level Security habilitada** (ver o final de
-`supabase/migrations/0001_schema.sql`). Antes de decidir hospedagem definitiva, confirme com o
-setor jurídico/TI da Câmara se há exigência de hospedagem em território nacional para dados de
-servidores públicos.
+A tabela `usuarios` usa a `anon key` pública do Supabase no navegador — por isso **toda tabela
+tem Row Level Security habilitada** (ver o final de `supabase/migrations/0001_schema.sql`).
+
+O único dado sensível guardado é o CPF, necessário para os requerimentos de reembolso (Anexo do
+Art. 9º da Resolução 40/2023). Ele fica isolado na tabela `pessoas_dados_sensiveis`
+(`supabase/migrations/0006_requerimentos_reembolso.sql`), separada do cadastro geral de
+`pessoas` — que continua com leitura livre para qualquer autenticado, usada nos seletores por
+todo o app. A policy de RLS de `pessoas_dados_sensiveis` só libera leitura para admin, ordenador
+da despesa, ou a própria pessoa dona do dado; escrita é só admin.
+
+Antes de decidir hospedagem definitiva, confirme com o setor jurídico/TI da Câmara se há
+exigência de hospedagem em território nacional para dados de servidores públicos.

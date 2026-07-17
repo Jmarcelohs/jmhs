@@ -24,6 +24,18 @@ export type Parecer =
 
 export type TipoAnexo = "imagem" | "pdf";
 
+export type CargoDeclarado = "Vereador(a)" | "Servidor(a)" | "Estagiário(a)";
+
+export type SubassuntoReembolso =
+  | "locomocao"
+  | "combustivel"
+  | "passagem_aerea"
+  | "passagem_onibus";
+
+export type StatusRequerimentoReembolso = "pendente" | "analise" | "deferido" | "indeferido";
+
+export type DecisaoRequerimentoReembolso = "autorizado" | "nao_autorizado";
+
 export interface Database {
   public: {
     Tables: {
@@ -68,6 +80,26 @@ export interface Database {
             columns: ["usuario_id"];
             isOneToOne: false;
             referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      pessoas_dados_sensiveis: {
+        Row: {
+          pessoa_id: string;
+          cpf: string | null;
+          atualizado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["pessoas_dados_sensiveis"]["Row"], "pessoa_id">> & {
+          pessoa_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pessoas_dados_sensiveis"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "pessoas_dados_sensiveis_pessoa_id_fkey";
+            columns: ["pessoa_id"];
+            isOneToOne: true;
+            referencedRelation: "pessoas";
             referencedColumns: ["id"];
           },
         ];
@@ -290,6 +322,52 @@ export interface Database {
           },
         ];
       };
+      requerimentos_reembolso: {
+        Row: {
+          id: string;
+          protocolo: string;
+          pessoa_id: string;
+          cargo_declarado: CargoDeclarado;
+          data_requerimento: string;
+          subassunto: SubassuntoReembolso;
+          data_ida: string;
+          data_volta: string;
+          municipio: string;
+          valor: number;
+          solicitacao_diaria_id: string | null;
+          status: StatusRequerimentoReembolso;
+          decisao: DecisaoRequerimentoReembolso | null;
+          decisao_data: string | null;
+          criado_por: string | null;
+          criado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["requerimentos_reembolso"]["Row"], "id">> & {
+          protocolo: string;
+          pessoa_id: string;
+          cargo_declarado: CargoDeclarado;
+          subassunto: SubassuntoReembolso;
+          data_ida: string;
+          data_volta: string;
+          municipio: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["requerimentos_reembolso"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "requerimentos_reembolso_pessoa_id_fkey";
+            columns: ["pessoa_id"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "requerimentos_reembolso_solicitacao_diaria_id_fkey";
+            columns: ["solicitacao_diaria_id"];
+            isOneToOne: false;
+            referencedRelation: "diarias_solicitacoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       emendas_impositivas: {
         Row: {
           id: string;
@@ -340,7 +418,12 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      proximo_protocolo_requerimento: {
+        Args: { p_ano: number };
+        Returns: number;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

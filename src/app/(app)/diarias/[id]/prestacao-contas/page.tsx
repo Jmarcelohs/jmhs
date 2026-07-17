@@ -68,6 +68,23 @@ export default async function PrestacaoContasPage({
     const podeCriar = usuario?.papel === "admin" || Boolean(minhaPessoa?.id);
     // (checagem fina de dono é feita pela policy de RLS no insert)
 
+    // Requerimentos de reembolso autorizados e vinculados a essa diária
+    // entram automaticamente no demonstrativo financeiro — aéreo para
+    // passagem aérea, urbano para locomoção/combustível/ônibus (só existem
+    // essas duas linhas de transporte no Anexo II oficial).
+    const { data: reembolsos } = await supabase
+      .from("requerimentos_reembolso")
+      .select("subassunto, valor")
+      .eq("solicitacao_diaria_id", id)
+      .eq("status", "deferido");
+
+    const debitoTransporteAereo = (reembolsos ?? [])
+      .filter((r) => r.subassunto === "passagem_aerea")
+      .reduce((acc, r) => acc + Number(r.valor), 0);
+    const debitoTransporteUrbano = (reembolsos ?? [])
+      .filter((r) => r.subassunto !== "passagem_aerea")
+      .reduce((acc, r) => acc + Number(r.valor), 0);
+
     if (solicitacao.status !== "Autorizado") {
       return (
         <div>
@@ -104,9 +121,27 @@ export default async function PrestacaoContasPage({
           <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{errorMsg}</p>
         )}
 
+        {(debitoTransporteAereo > 0 || debitoTransporteUrbano > 0) && (
+          <p className="mt-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            Valores de requerimentos de reembolso já autorizados para essa diária foram
+            somados automaticamente nos campos de transporte abaixo — revise antes de enviar.
+          </p>
+        )}
+
         <NovaPrestacaoForm
           action={criarPrestacaoContas.bind(null, id)}
           valorAutorizado={Number(solicitacao.total ?? 0)}
+          valoresIniciais={{
+            relatorio_resultado: "",
+            debito_diarias_previstas: Number(solicitacao.total ?? 0),
+            debito_diarias_nao_previstas: 0,
+            debito_transporte_aereo: debitoTransporteAereo,
+            debito_transporte_urbano: debitoTransporteUrbano,
+            credito_recebidas_antecipadamente: 0,
+            credito_reembolsar: 0,
+            credito_transporte_urbano: 0,
+            credito_devolver: 0,
+          }}
         />
       </div>
     );

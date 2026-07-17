@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Categoria } from "@/lib/supabase/database.types";
+import { apenasDigitos } from "@/lib/reembolso/mascaras";
 
 export async function criarPessoa(formData: FormData) {
   const supabase = await createClient();
@@ -12,15 +13,24 @@ export async function criarPessoa(formData: FormData) {
   const nome = String(formData.get("nome") ?? "").trim();
   const cargo = String(formData.get("cargo") ?? "").trim();
   const categoria = String(formData.get("categoria") ?? "") as Categoria;
+  const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
 
   if (!nome || !cargo || !categoria) {
     redirect(`/pessoas/nova?error=${encodeURIComponent("Preencha nome, cargo e categoria")}`);
   }
 
-  const { error } = await supabase.from("pessoas").insert({ matricula, nome, cargo, categoria });
+  const { data: pessoa, error } = await supabase
+    .from("pessoas")
+    .insert({ matricula, nome, cargo, categoria })
+    .select("id")
+    .single();
 
-  if (error) {
-    redirect(`/pessoas/nova?error=${encodeURIComponent(error.message)}`);
+  if (error || !pessoa) {
+    redirect(`/pessoas/nova?error=${encodeURIComponent(error?.message ?? "Erro ao salvar")}`);
+  }
+
+  if (cpf) {
+    await supabase.from("pessoas_dados_sensiveis").insert({ pessoa_id: pessoa!.id, cpf });
   }
 
   revalidatePath("/pessoas");
@@ -34,6 +44,7 @@ export async function editarPessoa(id: string, formData: FormData) {
   const nome = String(formData.get("nome") ?? "").trim();
   const cargo = String(formData.get("cargo") ?? "").trim();
   const categoria = String(formData.get("categoria") ?? "") as Categoria;
+  const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
 
   if (!nome || !cargo || !categoria) {
     redirect(`/pessoas/${id}/editar?error=${encodeURIComponent("Preencha nome, cargo e categoria")}`);
@@ -47,6 +58,10 @@ export async function editarPessoa(id: string, formData: FormData) {
   if (error) {
     redirect(`/pessoas/${id}/editar?error=${encodeURIComponent(error.message)}`);
   }
+
+  await supabase
+    .from("pessoas_dados_sensiveis")
+    .upsert({ pessoa_id: id, cpf, atualizado_em: new Date().toISOString() });
 
   revalidatePath("/pessoas");
   redirect("/pessoas");

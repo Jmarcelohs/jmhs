@@ -25,6 +25,12 @@ export default async function EditarPessoaPage({
 
   if (!pessoa) notFound();
 
+  const { data: sensivel } = await supabase
+    .from("pessoas_dados_sensiveis")
+    .select("cpf")
+    .eq("pessoa_id", id)
+    .maybeSingle();
+
   return (
     <div>
       <h1 className="text-xl font-semibold text-slate-900">Editar pessoa</h1>
@@ -42,6 +48,7 @@ export default async function EditarPessoaPage({
           nome: pessoa.nome,
           cargo: pessoa.cargo,
           categoria: pessoa.categoria,
+          cpf: sensivel?.cpf ?? "",
         }}
       />
     </div>
