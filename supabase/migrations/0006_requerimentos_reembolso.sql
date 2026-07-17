@@ -6,10 +6,14 @@
 -- adicioná-lo permanentemente, mas em tabela própria (pessoas_dados_
 -- sensiveis) com RLS mais restrita que a de "pessoas" (que é de leitura
 -- livre para qualquer autenticado, usada em seletores por todo o app).
--- Assim o CPF só é lido por admin ou pela própria pessoa dona do dado.
+-- Assim o CPF só é lido por admin, ordenador da despesa, ou pela própria
+-- pessoa dona do dado.
+--
+-- Idempotente (create ... if not exists / drop policy if exists) porque
+-- uma execução anterior pode ter parado no meio.
 -- ========================================================================
 
-create table pessoas_dados_sensiveis (
+create table if not exists pessoas_dados_sensiveis (
   pessoa_id uuid primary key references pessoas(id) on delete cascade,
   cpf text,
   atualizado_em timestamptz default now()
@@ -17,15 +21,19 @@ create table pessoas_dados_sensiveis (
 
 alter table pessoas_dados_sensiveis enable row level security;
 
+drop policy if exists "pessoas_sensiveis_select" on pessoas_dados_sensiveis;
 create policy "pessoas_sensiveis_select" on pessoas_dados_sensiveis for select
   using (
     auth_papel() in ('admin','ordenador_despesa')
     or pessoa_id = auth_pessoa_id()
   );
+drop policy if exists "pessoas_sensiveis_insert_admin" on pessoas_dados_sensiveis;
 create policy "pessoas_sensiveis_insert_admin" on pessoas_dados_sensiveis for insert
   with check (auth_papel() = 'admin');
+drop policy if exists "pessoas_sensiveis_update_admin" on pessoas_dados_sensiveis;
 create policy "pessoas_sensiveis_update_admin" on pessoas_dados_sensiveis for update
   using (auth_papel() = 'admin');
+drop policy if exists "pessoas_sensiveis_delete_admin" on pessoas_dados_sensiveis;
 create policy "pessoas_sensiveis_delete_admin" on pessoas_dados_sensiveis for delete
   using (auth_papel() = 'admin');
 
@@ -36,7 +44,7 @@ create policy "pessoas_sensiveis_delete_admin" on pessoas_dados_sensiveis for de
 -- entre requisições concorrentes).
 -- ========================================================================
 
-create table requerimentos_contadores (
+create table if not exists requerimentos_contadores (
   ano integer primary key,
   ultimo integer not null default 0
 );
@@ -69,7 +77,7 @@ $$;
 -- é hardcoded no template do documento.
 -- ========================================================================
 
-create table requerimentos_reembolso (
+create table if not exists requerimentos_reembolso (
   id uuid primary key default gen_random_uuid(),
   protocolo text not null unique,
   pessoa_id uuid references pessoas(id) not null,
@@ -88,28 +96,37 @@ create table requerimentos_reembolso (
   criado_em timestamptz default now()
 );
 
-create index idx_requerimentos_reembolso_pessoa on requerimentos_reembolso(pessoa_id);
-create index idx_requerimentos_reembolso_solicitacao on requerimentos_reembolso(solicitacao_diaria_id);
+create index if not exists idx_requerimentos_reembolso_pessoa on requerimentos_reembolso(pessoa_id);
+create index if not exists idx_requerimentos_reembolso_solicitacao on requerimentos_reembolso(solicitacao_diaria_id);
 
 alter table requerimentos_reembolso enable row level security;
 
 -- Mesma regra já usada em "requerimentos" (esqueleto original): dono vê/
 -- cria a própria, ordenador da despesa (quem decide, papel que já
 -- representa o Presidente nas diárias) e admin veem e decidem todas.
+drop policy if exists "requerimentos_reembolso_select" on requerimentos_reembolso;
 create policy "requerimentos_reembolso_select" on requerimentos_reembolso for select
   using (
     pessoa_id = auth_pessoa_id()
     or auth_papel() in ('ordenador_despesa','admin')
   );
+drop policy if exists "requerimentos_reembolso_insert" on requerimentos_reembolso;
 create policy "requerimentos_reembolso_insert" on requerimentos_reembolso for insert
   with check (pessoa_id = auth_pessoa_id() or auth_papel() = 'admin');
+drop policy if exists "requerimentos_reembolso_update" on requerimentos_reembolso;
 create policy "requerimentos_reembolso_update" on requerimentos_reembolso for update
   using (
     pessoa_id = auth_pessoa_id()
     or auth_papel() in ('ordenador_despesa','admin')
   );
+drop policy if exists "requerimentos_reembolso_delete" on requerimentos_reembolso;
 create policy "requerimentos_reembolso_delete" on requerimentos_reembolso for delete
   using (
     pessoa_id = auth_pessoa_id()
     or auth_papel() in ('ordenador_despesa','admin')
   );
+
+-- Força o PostgREST a recarregar o cache de schema, pra "requerimentos_
+-- reembolso" e "pessoas_dados_sensiveis" ficarem visíveis pra API
+-- imediatamente (sem esperar o próximo reload automático).
+notify pgrst, 'reload schema';
