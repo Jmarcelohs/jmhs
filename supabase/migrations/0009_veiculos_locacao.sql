@@ -5,6 +5,11 @@
 -- Traz pra dentro do sistema a ferramenta que antes era um arquivo HTML
 -- avulso. Catálogo de itens do pregão fica em tabela própria (em vez de
 -- hardcoded), pra não exigir alteração de código quando o pregão mudar.
+--
+-- Numeração: não usa contador em tabela própria — a sugestão de próximo
+-- número (maior número já usado no ano + 1, com fallback especial 47
+-- para 2026 sem nenhum registro ainda) é calculada direto na aplicação
+-- a partir dos registros existentes.
 -- ========================================================================
 
 create table veiculos_locacao_itens (
@@ -23,35 +28,6 @@ create table veiculos_locacao_itens (
 insert into veiculos_locacao_itens (codigo, descricao, faixa_km, valor_diaria) values
   ('item001', 'Grupo B (hatch)', 'até 300 km', 313.00),
   ('item002', 'Grupo C (SUV/sedan)', 'acima de 301 km', 616.00);
-
--- Numeração sequencial por ano, independente do contador de
--- requerimentos. Pré-carregado com 47 em 2026 porque as solicitações
--- 001 a 047 já existem na ferramenta antiga e serão importadas
--- manualmente com os números originais — assim a próxima sugestão pelo
--- app já sai como "048".
-create table veiculos_locacao_contadores (
-  ano integer primary key,
-  ultimo integer not null default 0
-);
-
-insert into veiculos_locacao_contadores (ano, ultimo) values (2026, 47)
-  on conflict (ano) do nothing;
-
-create or replace function proximo_numero_veiculo_locacao(p_ano integer)
-returns integer
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  novo integer;
-begin
-  insert into veiculos_locacao_contadores (ano, ultimo) values (p_ano, 1)
-  on conflict (ano) do update set ultimo = veiculos_locacao_contadores.ultimo + 1
-  returning ultimo into novo;
-  return novo;
-end;
-$$;
 
 create table veiculos_locacao_solicitacoes (
   id uuid primary key default gen_random_uuid(),
@@ -97,7 +73,6 @@ create index idx_veiculos_locacao_ano on veiculos_locacao_solicitacoes(ano);
 create index idx_veiculos_locacao_solicitante on veiculos_locacao_solicitacoes(pessoa_solicitante_id);
 
 alter table veiculos_locacao_itens enable row level security;
-alter table veiculos_locacao_contadores enable row level security;
 alter table veiculos_locacao_solicitacoes enable row level security;
 
 -- Catálogo: leitura livre pra autenticados (usado no seletor do
