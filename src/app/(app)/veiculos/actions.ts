@@ -91,16 +91,22 @@ export async function criarLocacao(formData: FormData) {
 
   let numero = campos.numeroManual;
   if (!numero) {
-    const { data: numeroGerado, error: numeroError } = await supabase.rpc(
-      "proximo_numero_veiculo_locacao",
-      { p_ano: ano },
+    // Sugestão = maior número já usado nesse ano + 1. Se ainda não existe
+    // nenhum registro do ano, começa do 1 — exceto 2026, que continua a
+    // numeração manual por e-mail que a Câmara já praticava (46 pedidos
+    // antes da ferramenta existir), então o primeiro sugerido é 47.
+    const { data: doAno } = await supabase
+      .from("veiculos_locacao_solicitacoes")
+      .select("numero")
+      .eq("ano", ano);
+
+    const maiorNumero = (doAno ?? []).reduce(
+      (max, r) => Math.max(max, Number(r.numero) || 0),
+      0,
     );
-    if (numeroError || numeroGerado == null) {
-      redirect(
-        `/veiculos/novo?error=${encodeURIComponent(numeroError?.message ?? "Erro ao gerar o número")}`,
-      );
-    }
-    numero = String(numeroGerado).padStart(3, "0");
+
+    const proximoNumero = maiorNumero > 0 ? maiorNumero + 1 : ano === 2026 ? 47 : 1;
+    numero = String(proximoNumero).padStart(3, "0");
   }
 
   const valor_total = campos.valor_diaria * campos.qtd_diarias;

@@ -517,10 +517,6 @@ export interface Database {
         Args: { p_ano: number };
         Returns: number;
       };
-      proximo_numero_veiculo_locacao: {
-        Args: { p_ano: number };
-        Returns: number;
-      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

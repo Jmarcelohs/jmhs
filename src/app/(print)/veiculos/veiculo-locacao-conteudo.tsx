@@ -1,10 +1,10 @@
-import { Celula, headerCell, PaginaA4, TabelaGrid } from "../celula";
-import { formatarData, formatarMoeda } from "@/lib/pdf/formato";
-
-function formatarHora(hora: string | null) {
-  if (!hora) return "—";
-  return hora.slice(0, 5);
-}
+import { PaginaA4 } from "../celula";
+import {
+  camposOficio,
+  dataPorExtenso,
+  paragrafoAbertura,
+  paragrafoFechamento,
+} from "@/lib/veiculos-locacao/documento";
 
 type Locacao = {
   numero: string;
@@ -13,13 +13,10 @@ type Locacao = {
   processo: string;
   locadora: string;
   solicitante_nome: string;
-  solicitante_cargo: string | null;
   condutor_nome: string;
-  condutor_cargo: string | null;
   veiculo_descricao: string;
   valor_diaria: number;
   qtd_diarias: number;
-  valor_total: number;
   data_retirada: string;
   hora_retirada: string | null;
   local_retirada: string | null;
@@ -36,75 +33,55 @@ export function VeiculoLocacaoConteudo({
   locacao: Locacao;
   quebrarPagina?: boolean;
 }) {
+  const campos = camposOficio({
+    processo: locacao.processo,
+    locadora: locacao.locadora,
+    solicitanteNome: locacao.solicitante_nome,
+    condutorNome: locacao.condutor_nome,
+    veiculoDescricao: locacao.veiculo_descricao,
+    valorDiaria: locacao.valor_diaria,
+    dataRetirada: locacao.data_retirada,
+    horaRetirada: locacao.hora_retirada,
+    localRetirada: locacao.local_retirada,
+    dataDevolucao: locacao.data_devolucao,
+    horaDevolucao: locacao.hora_devolucao,
+    localDevolucao: locacao.local_devolucao,
+    qtdDiarias: locacao.qtd_diarias,
+  });
+
   return (
     <PaginaA4 quebrarPagina={quebrarPagina}>
-      <div className="mx-[15mm] mt-[32mm] mb-[26mm] flex flex-1 flex-col">
-        <p className="text-center text-[11pt] font-semibold">
-          SOLICITAÇÃO DE LOCAÇÃO DE VEÍCULO Nº {locacao.numero}/{locacao.ano}
-        </p>
-        <p className="mt-1 text-center text-[9pt]">
-          {locacao.processo} — Locadora {locacao.locadora}
-        </p>
+      <div className="mx-[30mm] mt-[32.5mm] mb-[25mm] flex flex-1 flex-col text-[11pt] leading-relaxed">
+        <p className="text-right">Nepomuceno, {dataPorExtenso(locacao.data_pedido)}.</p>
 
-        <TabelaGrid className="mt-4">
-          <Celula span={6} className={headerCell}>Solicitante</Celula>
-          <Celula span={6} className={headerCell}>Condutor</Celula>
-
-          <Celula span={6}>
-            {locacao.solicitante_nome}
-            {locacao.solicitante_cargo ? ` — ${locacao.solicitante_cargo}` : ""}
-          </Celula>
-          <Celula span={6}>
-            {locacao.condutor_nome}
-            {locacao.condutor_cargo ? ` — ${locacao.condutor_cargo}` : ""}
-          </Celula>
-
-          <Celula span={12} className={headerCell}>Veículo</Celula>
-          <Celula span={12}>{locacao.veiculo_descricao}</Celula>
-
-          <Celula span={4} className={headerCell}>Valor da diária</Celula>
-          <Celula span={4} className={headerCell}>Qtd. diárias</Celula>
-          <Celula span={4} className={headerCell}>Valor total</Celula>
-
-          <Celula span={4} className="text-center">{formatarMoeda(locacao.valor_diaria)}</Celula>
-          <Celula span={4} className="text-center">{locacao.qtd_diarias}</Celula>
-          <Celula span={4} className="text-center font-semibold">
-            {formatarMoeda(locacao.valor_total)}
-          </Celula>
-
-          <Celula span={6} className={headerCell}>Retirada</Celula>
-          <Celula span={6} className={headerCell}>Devolução</Celula>
-
-          <Celula span={6}>
-            {formatarData(locacao.data_retirada)} às {formatarHora(locacao.hora_retirada)}
-            <br />
-            {locacao.local_retirada ?? "—"}
-          </Celula>
-          <Celula span={6}>
-            {formatarData(locacao.data_devolucao)} às {formatarHora(locacao.hora_devolucao)}
-            <br />
-            {locacao.local_devolucao ?? "—"}
-          </Celula>
-
-          {locacao.observacoes && (
-            <>
-              <Celula span={12} className={headerCell}>Observações</Celula>
-              <Celula span={12} className="min-h-[16mm] align-top whitespace-pre-wrap">
-                {locacao.observacoes}
-              </Celula>
-            </>
-          )}
-        </TabelaGrid>
-
-        <p className="mt-6 text-right text-[9pt]">
-          Nepomuceno/MG, {formatarData(locacao.data_pedido)}.
+        <p className="mt-6 text-center text-[13pt] font-bold">
+          SOLICITAÇÃO Nº {locacao.numero}/{locacao.ano}
         </p>
 
-        <div className="mt-[16mm] text-center text-[9pt]">
-          <div className="mx-auto w-[90mm] border-t border-black pt-1">
-            Assinatura do solicitante
-          </div>
+        <p className="mt-6">Prezados(as),</p>
+
+        <p className="mt-3 text-justify">
+          {paragrafoAbertura(locacao.processo, locacao.locadora)}
+        </p>
+
+        <div className="mt-4 space-y-1">
+          {campos.map((c) => (
+            <p key={c.label}>
+              <span className="font-bold">{c.label}:</span> {c.valor}
+            </p>
+          ))}
         </div>
+
+        {locacao.observacoes && (
+          <p className="mt-4 text-justify">
+            <span className="font-bold">Observações:</span> {locacao.observacoes}
+          </p>
+        )}
+
+        <p className="mt-4 text-justify">{paragrafoFechamento()}</p>
+
+        <p className="mt-8">Atenciosamente,</p>
+        <p className="font-bold">Câmara Municipal de Nepomuceno.</p>
       </div>
     </PaginaA4>
   );

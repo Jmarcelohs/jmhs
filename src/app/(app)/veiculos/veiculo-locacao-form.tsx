@@ -200,23 +200,43 @@ export function VeiculoLocacaoForm({
     setValorDiaria(valor);
   }
 
-  const valorTotal = valorDiaria * qtdDiarias;
+  // Recalcula a quantidade de diárias sempre que uma das duas datas muda —
+  // só sobrescreve se der um intervalo válido (> 0 dias); o campo continua
+  // editável manualmente depois (ex.: cobrança combinada com a locadora
+  // por um número fixo de diárias diferente do calendário corrido).
+  function diasEntre(retirada: string, devolucao: string) {
+    if (!retirada || !devolucao) return null;
+    const d1 = new Date(`${retirada}T00:00:00`);
+    const d2 = new Date(`${devolucao}T00:00:00`);
+    const diff = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : null;
+  }
+
+  function handleDataRetiradaChange(valor: string) {
+    setDataRetirada(valor);
+    const dias = diasEntre(valor, dataDevolucao);
+    if (dias) setQtdDiarias(dias);
+  }
+
+  function handleDataDevolucaoChange(valor: string) {
+    setDataDevolucao(valor);
+    const dias = diasEntre(dataRetirada, valor);
+    if (dias) setQtdDiarias(dias);
+  }
 
   const mensagem = useMemo(
     () =>
       mensagemSolicitacaoVeiculo({
         numero: valoresIniciais?.numero || "(gerado automaticamente)",
         ano: new Date(dataPedido).getFullYear(),
+        dataPedido,
         processo: "PRC011 - Pregão 003/2026",
         locadora: "LOCAMAR LTDA",
         solicitanteNome: solicitanteNome || "—",
-        solicitanteCargo,
         condutorNome: condutorNomeEfetivo || "—",
-        condutorCargo: condutorCargoEfetivo,
         veiculoDescricao: veiculoDescricao || "—",
         valorDiaria,
         qtdDiarias,
-        valorTotal,
         dataRetirada: dataRetirada || null,
         horaRetirada: horaRetirada || null,
         localRetirada,
@@ -229,13 +249,10 @@ export function VeiculoLocacaoForm({
       valoresIniciais?.numero,
       dataPedido,
       solicitanteNome,
-      solicitanteCargo,
       condutorNomeEfetivo,
-      condutorCargoEfetivo,
       veiculoDescricao,
       valorDiaria,
       qtdDiarias,
-      valorTotal,
       dataRetirada,
       horaRetirada,
       localRetirada,
@@ -388,11 +405,11 @@ export function VeiculoLocacaoForm({
               onChange={(e) => setQtdDiarias(Number(e.target.value) || 1)}
               className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Calculada automaticamente pelas datas — pode ajustar.
+            </p>
           </div>
         </div>
-        <p className="mt-2 text-sm font-medium text-slate-700">
-          Total: {valorTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -405,7 +422,7 @@ export function VeiculoLocacaoForm({
               name="data_retirada"
               required
               value={dataRetirada}
-              onChange={(e) => setDataRetirada(e.target.value)}
+              onChange={(e) => handleDataRetiradaChange(e.target.value)}
               className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
             />
           </div>
@@ -438,7 +455,7 @@ export function VeiculoLocacaoForm({
               name="data_devolucao"
               required
               value={dataDevolucao}
-              onChange={(e) => setDataDevolucao(e.target.value)}
+              onChange={(e) => handleDataDevolucaoChange(e.target.value)}
               className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
             />
           </div>
