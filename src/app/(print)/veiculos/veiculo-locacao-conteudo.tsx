@@ -1,10 +1,6 @@
 import { PaginaA4 } from "../celula";
-import {
-  camposOficio,
-  dataPorExtenso,
-  paragrafoAbertura,
-  paragrafoFechamento,
-} from "@/lib/veiculos-locacao/documento";
+import { camposOficio, paragrafoAbertura, paragrafoFechamento } from "@/lib/veiculos-locacao/documento";
+import { dataPorExtenso } from "@/lib/pdf/formato";
 
 type Locacao = {
   numero: string;

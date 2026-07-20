@@ -8,6 +8,18 @@ export function formatarMoeda(valor: number) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const MESES = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+// Data por extenso em português, ex.: "2026-07-06" → "06 de julho de 2026".
+export function dataPorExtenso(dataISO: string | null) {
+  if (!dataISO) return "—";
+  const [ano, mes, dia] = dataISO.split("-").map(Number);
+  return `${String(dia).padStart(2, "0")} de ${MESES[mes - 1]} de ${ano}`;
+}
+
 const UNIDADES = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
 const DEZ_A_DEZENOVE = [
   "dez", "onze", "doze", "treze", "quatorze", "quinze",

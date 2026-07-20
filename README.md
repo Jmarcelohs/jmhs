@@ -149,6 +149,23 @@ supabase/
   podem ser vinculados a uma locação específica (só rastreabilidade, sem soma automática).
   Relatório em PDF paginado (formato paisagem) do histórico filtrado ainda não foi construído —
   ficou só a exportação CSV por ora.
+- Gestor de Requerimentos Internos (menu "Requerimentos Internos", separado do menu
+  "Reembolso" — que é só o antigo "Requerimentos"): categorias RH, Ao Presidente e Geral, com
+  o mesmo formulário e layout de documento pras três (a única diferença é o destinatário do
+  texto e quais assuntos cada uma tem pré-cadastrados). RH já vem com os 8 assuntos padronizados
+  (Férias, Licenças, Declarações, Dados Funcionais, Folga de Aniversário, Adiantamento,
+  13º Salário, Outros) — escolher um assunto troca a caixa de descrição livre por campos
+  específicos daquele assunto (data/texto/select), e o texto do requerimento é montado
+  automaticamente. "Presidente" e "Geral" ainda não têm assunto pré-cadastrado (só modo
+  "Personalizado"/descrição livre) — é o próximo passo natural quando surgir a necessidade.
+  Numeração sequencial por ano, própria de cada categoria (não compartilha com o Reembolso).
+  Valor com máscara R$ e extenso automático, parágrafo de decisão do Presidente presente em
+  todo requerimento (mesmo os de RH — decisão de produto, não limitação técnica), PDF no
+  timbrado oficial, painel com contadores por status/categoria integrado ao Painel principal,
+  lista com filtro/ranking de solicitantes/exportação CSV. O wizard de 3 passos da
+  especificação original virou um formulário de página única com seções numeradas — mesmo
+  fluxo, menos cliques. Dados institucionais (nome da Câmara, UF, Presidente) ficam fixos no
+  código, como no resto do sistema, sem tela de Configuração dedicada por ora.
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —

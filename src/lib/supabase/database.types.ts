@@ -36,6 +36,12 @@ export type StatusRequerimentoReembolso = "pendente" | "analise" | "deferido" | 
 
 export type DecisaoRequerimentoReembolso = "autorizado" | "nao_autorizado";
 
+export type TipoRequerimentoInterno = "rh" | "presidente" | "geral";
+
+export type StatusRequerimentoInterno = "pendente" | "analise" | "deferido" | "indeferido";
+
+export type DecisaoRequerimentoInterno = "autorizado" | "nao_autorizado";
+
 export interface Database {
   public: {
     Tables: {
@@ -379,6 +385,51 @@ export interface Database {
           },
         ];
       };
+      requerimentos_internos: {
+        Row: {
+          id: string;
+          numero: string;
+          ano: number;
+          tipo: TipoRequerimentoInterno;
+          status: StatusRequerimentoInterno;
+          decisao: DecisaoRequerimentoInterno | null;
+          decisao_data: string | null;
+          pessoa_id: string | null;
+          nome: string;
+          cargo: CargoDeclarado;
+          cpf: string | null;
+          matricula: string | null;
+          data_requerimento: string;
+          assunto_key: string | null;
+          assunto: string;
+          subassunto_key: string | null;
+          fundamento: string | null;
+          campos: Record<string, string>;
+          pedido: string | null;
+          referente_a: string | null;
+          valor: number | null;
+          criado_por: string | null;
+          criado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["requerimentos_internos"]["Row"], "id">> & {
+          numero: string;
+          ano: number;
+          tipo: TipoRequerimentoInterno;
+          nome: string;
+          cargo: CargoDeclarado;
+          assunto: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["requerimentos_internos"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "requerimentos_internos_pessoa_id_fkey";
+            columns: ["pessoa_id"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       veiculos_locacao_itens: {
         Row: {
           id: string;
@@ -517,6 +568,10 @@ export interface Database {
     Functions: {
       proximo_protocolo_requerimento: {
         Args: { p_ano: number };
+        Returns: number;
+      };
+      proximo_protocolo_requerimento_interno: {
+        Args: { p_tipo: string; p_ano: number };
         Returns: number;
       };
     };

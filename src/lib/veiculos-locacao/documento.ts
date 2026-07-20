@@ -1,25 +1,4 @@
-import { formatarData, formatarMoeda } from "@/lib/pdf/formato";
-
-const MESES = [
-  "janeiro",
-  "fevereiro",
-  "março",
-  "abril",
-  "maio",
-  "junho",
-  "julho",
-  "agosto",
-  "setembro",
-  "outubro",
-  "novembro",
-  "dezembro",
-];
-
-export function dataPorExtenso(dataISO: string | null) {
-  if (!dataISO) return "—";
-  const [ano, mes, dia] = dataISO.split("-").map(Number);
-  return `${String(dia).padStart(2, "0")} de ${MESES[mes - 1]} de ${ano}`;
-}
+import { dataPorExtenso, formatarData, formatarMoeda } from "@/lib/pdf/formato";
 
 function formatarHora(hora: string | null) {
   if (!hora) return "—";

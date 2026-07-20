@@ -4,7 +4,8 @@ import { AppShell } from "./app-shell";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Painel" },
   { href: "/diarias", label: "Diárias de Viagem" },
-  { href: "/requerimentos", label: "Requerimentos" },
+  { href: "/requerimentos-internos", label: "Requerimentos Internos" },
+  { href: "/requerimentos", label: "Reembolso" },
   { href: "/veiculos", label: "Veículos" },
   { href: "/pessoas", label: "Pessoas" },
 ];
