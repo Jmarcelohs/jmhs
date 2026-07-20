@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { signIn } from "./actions";
+import { BotaoSuporteWhatsapp } from "@/components/botao-suporte-whatsapp";
 
 export default async function LoginPage({
   searchParams,
@@ -68,6 +69,8 @@ export default async function LoginPage({
           </form>
         </div>
       </div>
+
+      <BotaoSuporteWhatsapp />
     </div>
   );
 }

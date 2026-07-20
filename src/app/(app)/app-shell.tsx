@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { BotaoSuporteWhatsapp } from "@/components/botao-suporte-whatsapp";
 
 type NavItem = { href: string; label: string };
 type Usuario = { nome: string; papel: string } | null;
@@ -135,6 +136,8 @@ export function AppShell({
       <main className="lg:pl-64">
         <div className="mx-auto w-full max-w-5xl px-4 py-8">{children}</div>
       </main>
+
+      <BotaoSuporteWhatsapp />
     </div>
   );
 }
