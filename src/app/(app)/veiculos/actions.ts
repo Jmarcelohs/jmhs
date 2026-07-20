@@ -93,8 +93,8 @@ export async function criarLocacao(formData: FormData) {
   if (!numero) {
     // Sugestão = maior número já usado nesse ano + 1. Se ainda não existe
     // nenhum registro do ano, começa do 1 — exceto 2026, que continua a
-    // numeração manual por e-mail que a Câmara já praticava (46 pedidos
-    // antes da ferramenta existir), então o primeiro sugerido é 47.
+    // numeração manual por e-mail que a Câmara já praticava antes da
+    // ferramenta existir, então o primeiro sugerido é 53.
     const { data: doAno } = await supabase
       .from("veiculos_locacao_solicitacoes")
       .select("numero")
@@ -105,7 +105,7 @@ export async function criarLocacao(formData: FormData) {
       0,
     );
 
-    const proximoNumero = maiorNumero > 0 ? maiorNumero + 1 : ano === 2026 ? 47 : 1;
+    const proximoNumero = maiorNumero > 0 ? maiorNumero + 1 : ano === 2026 ? 53 : 1;
     numero = String(proximoNumero).padStart(3, "0");
   }
 
