@@ -3,6 +3,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* O app não tem um tema escuro próprio — todo componente já usa cores
+     fixas (bg-white, text-slate-900 etc.). Sem isso, navegadores em modo
+     escuro do celular/SO renderizam campos nativos (inputs, selects) com
+     texto claro por padrão, que fica quase invisível sobre o fundo
+     branco dos formulários. */
+  color-scheme: light;
 }
 
 @theme inline {
@@ -15,13 +21,6 @@
   --color-brand-navy-light: #163c52;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
