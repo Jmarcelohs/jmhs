@@ -377,6 +377,7 @@ export function VeiculoLocacaoForm({
             <option value="manual">Manual (fora do catálogo)</option>
           </select>
           <input
+            name="veiculo_descricao"
             value={veiculoDescricao}
             onChange={(e) => setVeiculoDescricao(e.target.value)}
             placeholder="Descrição do veículo"
