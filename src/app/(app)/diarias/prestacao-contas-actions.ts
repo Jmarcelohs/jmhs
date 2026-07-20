@@ -82,9 +82,13 @@ export async function criarPrestacaoContas(solicitacaoId: string, formData: Form
     .single();
 
   if (error || !prestacao) {
-    redirect(
-      `/diarias/${solicitacaoId}/prestacao-contas?error=${encodeURIComponent(error?.message ?? "Erro ao salvar a prestação de contas")}`,
-    );
+    // Duplicate key = essa diária já tem prestação de contas (ex.: duplo
+    // clique no envio) — a tela de prestação de contas já mostra a
+    // existente ao recarregar.
+    const mensagem = error?.message.includes("duplicate key")
+      ? "Essa diária já tem uma prestação de contas registrada."
+      : (error?.message ?? "Erro ao salvar a prestação de contas");
+    redirect(`/diarias/${solicitacaoId}/prestacao-contas?error=${encodeURIComponent(mensagem)}`);
   }
 
   revalidatePath(`/diarias/${solicitacaoId}`);

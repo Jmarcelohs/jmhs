@@ -52,9 +52,10 @@ export function NovaPrestacaoForm({
   mostrarDeclaracao?: boolean;
 }) {
   const [relatorio, setRelatorio] = useState(valoresIniciais?.relatorio_resultado ?? "");
+  const [enviando, setEnviando] = useState(false);
 
   return (
-    <form action={action} className="mt-6 space-y-6">
+    <form action={action} onSubmit={() => setEnviando(true)} className="mt-6 space-y-6">
       <div>
         <label className="block text-sm font-medium text-slate-700">
           Relatório do resultado da viagem — com ênfase no interesse público defendido
@@ -134,9 +135,10 @@ export function NovaPrestacaoForm({
 
       <button
         type="submit"
-        className="rounded-md bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:bg-brand-navy-light"
+        disabled={enviando}
+        className="rounded-md bg-brand-navy px-4 py-2 text-sm font-medium text-white hover:bg-brand-navy-light disabled:opacity-60"
       >
-        {submitLabel}
+        {enviando ? "Enviando…" : submitLabel}
       </button>
     </form>
   );
