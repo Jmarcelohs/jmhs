@@ -7,6 +7,7 @@ import type { CargoDeclarado, Categoria, SubassuntoReembolso } from "@/lib/supab
 
 type Pessoa = { id: string; nome: string; cargo: string; categoria: Categoria; cpf: string | null };
 type Diaria = { id: string; pessoa_id: string; numero_diaria: string | null; municipio_destino: string | null };
+type VeiculoLocacao = { id: string; numero: string; ano: number; veiculo_descricao: string };
 
 const SUBASSUNTOS: SubassuntoReembolso[] = [
   "locomocao",
@@ -32,12 +33,14 @@ export type ValoresIniciaisReembolso = {
   municipio: string;
   valor: number;
   solicitacao_diaria_id: string;
+  solicitacao_veiculo_id: string;
 };
 
 export function ReembolsoForm({
   action,
   pessoas,
   diarias,
+  veiculos,
   pessoaFixaId,
   valoresIniciais,
   submitLabel = "Enviar requerimento",
@@ -45,6 +48,7 @@ export function ReembolsoForm({
   action: (formData: FormData) => void;
   pessoas: Pessoa[];
   diarias: Diaria[];
+  veiculos: VeiculoLocacao[];
   pessoaFixaId?: string;
   valoresIniciais?: ValoresIniciaisReembolso;
   submitLabel?: string;
@@ -66,6 +70,9 @@ export function ReembolsoForm({
   const [municipio, setMunicipio] = useState(valoresIniciais?.municipio ?? "");
   const [solicitacaoDiariaId, setSolicitacaoDiariaId] = useState(
     valoresIniciais?.solicitacao_diaria_id ?? "",
+  );
+  const [solicitacaoVeiculoId, setSolicitacaoVeiculoId] = useState(
+    valoresIniciais?.solicitacao_veiculo_id ?? "",
   );
 
   const valorInicialTexto = valoresIniciais?.valor
@@ -273,6 +280,30 @@ export function ReembolsoForm({
             dessa diária ao prestar contas.
           </p>
         </div>
+
+        {subassunto === "combustivel" && (
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-slate-700">
+              Vincular a uma locação de veículo (opcional)
+            </label>
+            <select
+              name="solicitacao_veiculo_id"
+              value={solicitacaoVeiculoId}
+              onChange={(e) => setSolicitacaoVeiculoId(e.target.value)}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="">Nenhuma</option>
+              {veiculos.map((v) => (
+                <option key={v.id} value={v.id}>
+                  Locação {v.numero}/{v.ano} — {v.veiculo_descricao}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              Só pra referência/rastreabilidade — não altera nenhum valor automaticamente.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">

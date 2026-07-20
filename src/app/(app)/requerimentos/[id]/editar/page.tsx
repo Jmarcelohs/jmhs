@@ -32,7 +32,7 @@ export default async function EditarReembolsoPage({
   const podeEditar = usuario?.papel === "admin" || minhaPessoa?.id === requerimento.pessoa_id;
   if (!podeEditar) redirect(`/requerimentos/${id}`);
 
-  const [{ data: pessoas }, { data: sensiveis }, { data: diarias }] = await Promise.all([
+  const [{ data: pessoas }, { data: sensiveis }, { data: diarias }, { data: veiculos }] = await Promise.all([
     supabase.from("pessoas").select("id, nome, cargo, categoria").eq("ativo", true).order("nome"),
     supabase.from("pessoas_dados_sensiveis").select("pessoa_id, cpf"),
     supabase
@@ -40,6 +40,11 @@ export default async function EditarReembolsoPage({
       .select("id, pessoa_id, numero_diaria, municipio_destino")
       .eq("status", "Autorizado")
       .order("data_partida", { ascending: false }),
+    supabase
+      .from("veiculos_locacao_solicitacoes")
+      .select("id, numero, ano, veiculo_descricao")
+      .order("ano", { ascending: false })
+      .order("numero", { ascending: false }),
   ]);
 
   const cpfPorPessoa = new Map((sensiveis ?? []).map((s) => [s.pessoa_id, s.cpf]));
@@ -62,6 +67,7 @@ export default async function EditarReembolsoPage({
         action={editarReembolso.bind(null, id)}
         pessoas={pessoasComCpf}
         diarias={diarias ?? []}
+        veiculos={veiculos ?? []}
         pessoaFixaId={requerimento.pessoa_id}
         submitLabel="Salvar alterações"
         valoresIniciais={{
@@ -75,6 +81,7 @@ export default async function EditarReembolsoPage({
           municipio: requerimento.municipio,
           valor: Number(requerimento.valor),
           solicitacao_diaria_id: requerimento.solicitacao_diaria_id ?? "",
+          solicitacao_veiculo_id: requerimento.solicitacao_veiculo_id ?? "",
         }}
       />
     </div>

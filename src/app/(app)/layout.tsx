@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Painel" },
   { href: "/diarias", label: "Diárias de Viagem" },
   { href: "/requerimentos", label: "Requerimentos" },
+  { href: "/veiculos", label: "Veículos" },
   { href: "/pessoas", label: "Pessoas" },
 ];
 

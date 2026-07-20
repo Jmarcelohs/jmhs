@@ -141,11 +141,21 @@ supabase/
   inativar/reativar e excluir — sem precisar mais do SQL Editor no dia a dia. Inativar um
   usuário agora realmente revoga o acesso dele (RLS passou a checar `usuarios.ativo`, o que
   não acontecia antes).
+- Locação de Veículos (Pregão nº 003/2026, Processo PRC011, locadora LOCAMAR LTDA): formulário
+  com catálogo de itens do pregão (valor de diária pré-preenchido, editável), solicitante/
+  condutor do cadastro de pessoas ou "Outro", numeração sequencial por ano (manual ou
+  automática), prévia da mensagem com botão copiar, histórico com filtro por ano/solicitante e
+  exportação CSV, PDF no timbrado oficial. Requerimentos de reembolso do tipo "combustível"
+  podem ser vinculados a uma locação específica (só rastreabilidade, sem soma automática).
+  Relatório em PDF paginado (formato paisagem) do histórico filtrado ainda não foi construído —
+  ficou só a exportação CSV por ora.
 
 **Ainda falta (ver seção 9 da especificação para o roadmap completo):**
 - Cálculo automático da gradação por duração do afastamento (seção 4.3 da especificação) —
   hoje o formulário não pede hora de saída/retorno.
-- Módulos de Emendas Impositivas e Veículos (só o schema existe).
+- Módulo de Emendas Impositivas (só o schema existe). A tabela `veiculos_solicitacoes`
+  (esqueleto genérico original) também segue sem uso — foi substituída, para a necessidade
+  real trazida, pelo módulo específico de Locação de Veículos acima.
 - Decisão de hospedagem: Vercel (frontend) + Supabase (banco), região São Paulo (`gru1`,
   ver `vercel.json`) — ainda falta confirmar com o jurídico/TI da Câmara se há exigência formal
   de hospedagem em território nacional (seção 10 da especificação). Política de backup também

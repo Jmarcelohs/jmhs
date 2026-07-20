@@ -336,6 +336,7 @@ export interface Database {
           municipio: string;
           valor: number;
           solicitacao_diaria_id: string | null;
+          solicitacao_veiculo_id: string | null;
           status: StatusRequerimentoReembolso;
           decisao: DecisaoRequerimentoReembolso | null;
           decisao_data: string | null;
@@ -365,6 +366,98 @@ export interface Database {
             columns: ["solicitacao_diaria_id"];
             isOneToOne: false;
             referencedRelation: "diarias_solicitacoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "requerimentos_reembolso_solicitacao_veiculo_id_fkey";
+            columns: ["solicitacao_veiculo_id"];
+            isOneToOne: false;
+            referencedRelation: "veiculos_locacao_solicitacoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      veiculos_locacao_itens: {
+        Row: {
+          id: string;
+          processo: string;
+          locadora: string;
+          codigo: string;
+          descricao: string;
+          faixa_km: string | null;
+          valor_diaria: number;
+          ativo: boolean;
+          criado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["veiculos_locacao_itens"]["Row"], "id">> & {
+          codigo: string;
+          descricao: string;
+          valor_diaria: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["veiculos_locacao_itens"]["Row"]>;
+        Relationships: [];
+      };
+      veiculos_locacao_solicitacoes: {
+        Row: {
+          id: string;
+          numero: string;
+          ano: number;
+          data_pedido: string;
+          processo: string;
+          locadora: string;
+          pessoa_solicitante_id: string | null;
+          solicitante_nome: string;
+          solicitante_matricula: string | null;
+          solicitante_cargo: string | null;
+          pessoa_condutor_id: string | null;
+          condutor_nome: string;
+          condutor_matricula: string | null;
+          condutor_cargo: string | null;
+          item_id: string | null;
+          veiculo_descricao: string;
+          valor_diaria: number;
+          qtd_diarias: number;
+          valor_total: number;
+          data_retirada: string;
+          hora_retirada: string | null;
+          local_retirada: string | null;
+          data_devolucao: string;
+          hora_devolucao: string | null;
+          local_devolucao: string | null;
+          observacoes: string | null;
+          criado_por: string | null;
+          criado_em: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["veiculos_locacao_solicitacoes"]["Row"], "id">> & {
+          numero: string;
+          ano: number;
+          solicitante_nome: string;
+          condutor_nome: string;
+          veiculo_descricao: string;
+          data_retirada: string;
+          data_devolucao: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["veiculos_locacao_solicitacoes"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "veiculos_locacao_solicitacoes_pessoa_solicitante_id_fkey";
+            columns: ["pessoa_solicitante_id"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "veiculos_locacao_solicitacoes_pessoa_condutor_id_fkey";
+            columns: ["pessoa_condutor_id"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "veiculos_locacao_solicitacoes_item_id_fkey";
+            columns: ["item_id"];
+            isOneToOne: false;
+            referencedRelation: "veiculos_locacao_itens";
             referencedColumns: ["id"];
           },
         ];
@@ -421,6 +514,10 @@ export interface Database {
     Views: Record<string, never>;
     Functions: {
       proximo_protocolo_requerimento: {
+        Args: { p_ano: number };
+        Returns: number;
+      };
+      proximo_numero_veiculo_locacao: {
         Args: { p_ano: number };
         Returns: number;
       };

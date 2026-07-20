@@ -32,7 +32,9 @@ export default async function DetalheReembolsoPage({
 
   const { data: requerimento } = await supabase
     .from("requerimentos_reembolso")
-    .select("*, pessoas(nome, cargo), diarias_solicitacoes(numero_diaria, municipio_destino)")
+    .select(
+      "*, pessoas(nome, cargo), diarias_solicitacoes(numero_diaria, municipio_destino), veiculos_locacao_solicitacoes(numero, ano, veiculo_descricao)",
+    )
     .eq("id", id)
     .single();
 
@@ -46,6 +48,11 @@ export default async function DetalheReembolsoPage({
   const diaria = requerimento.diarias_solicitacoes as unknown as {
     numero_diaria: string | null;
     municipio_destino: string | null;
+  } | null;
+  const veiculo = requerimento.veiculos_locacao_solicitacoes as unknown as {
+    numero: string;
+    ano: number;
+    veiculo_descricao: string;
   } | null;
 
   const podeGerenciar = usuario?.papel === "admin" || minhaPessoa?.id === requerimento.pessoa_id;
@@ -143,6 +150,19 @@ export default async function DetalheReembolsoPage({
               <span className="ml-2 text-xs text-slate-500">
                 (entra automaticamente no PDF combinado da prestação de contas dessa diária)
               </span>
+            </dd>
+          </div>
+        )}
+        {veiculo && (
+          <div className="sm:col-span-2">
+            <dt className="text-slate-500">Locação de veículo vinculada</dt>
+            <dd className="text-slate-900">
+              <Link
+                href={`/veiculos/${requerimento.solicitacao_veiculo_id}/editar`}
+                className="hover:underline"
+              >
+                Locação {veiculo.numero}/{veiculo.ano} — {veiculo.veiculo_descricao}
+              </Link>
             </dd>
           </div>
         )}

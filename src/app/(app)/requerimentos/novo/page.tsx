@@ -10,7 +10,7 @@ export default async function NovoReembolsoPage({
   const { error } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: pessoas }, { data: sensiveis }, { data: diarias }] = await Promise.all([
+  const [{ data: pessoas }, { data: sensiveis }, { data: diarias }, { data: veiculos }] = await Promise.all([
     supabase.from("pessoas").select("id, nome, cargo, categoria").eq("ativo", true).order("nome"),
     supabase.from("pessoas_dados_sensiveis").select("pessoa_id, cpf"),
     supabase
@@ -18,6 +18,11 @@ export default async function NovoReembolsoPage({
       .select("id, pessoa_id, numero_diaria, municipio_destino")
       .eq("status", "Autorizado")
       .order("data_partida", { ascending: false }),
+    supabase
+      .from("veiculos_locacao_solicitacoes")
+      .select("id, numero, ano, veiculo_descricao")
+      .order("ano", { ascending: false })
+      .order("numero", { ascending: false }),
   ]);
 
   const cpfPorPessoa = new Map((sensiveis ?? []).map((s) => [s.pessoa_id, s.cpf]));
@@ -37,7 +42,12 @@ export default async function NovoReembolsoPage({
         <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       )}
 
-      <ReembolsoForm action={criarReembolso} pessoas={pessoasComCpf} diarias={diarias ?? []} />
+      <ReembolsoForm
+        action={criarReembolso}
+        pessoas={pessoasComCpf}
+        diarias={diarias ?? []}
+        veiculos={veiculos ?? []}
+      />
     </div>
   );
 }

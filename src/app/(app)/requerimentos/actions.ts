@@ -23,6 +23,7 @@ export async function criarReembolso(formData: FormData) {
   const municipio = String(formData.get("municipio") ?? "").trim();
   const valor = Number(formData.get("valor") ?? 0);
   const solicitacao_diaria_id = String(formData.get("solicitacao_diaria_id") ?? "") || null;
+  const solicitacao_veiculo_id = String(formData.get("solicitacao_veiculo_id") ?? "") || null;
 
   if (
     !pessoa_id ||
@@ -73,6 +74,7 @@ export async function criarReembolso(formData: FormData) {
       municipio,
       valor,
       solicitacao_diaria_id,
+      solicitacao_veiculo_id,
       criado_por: usuario.id,
     })
     .select("id")
@@ -103,6 +105,7 @@ export async function editarReembolso(id: string, formData: FormData) {
   const municipio = String(formData.get("municipio") ?? "").trim();
   const valor = Number(formData.get("valor") ?? 0);
   const solicitacao_diaria_id = String(formData.get("solicitacao_diaria_id") ?? "") || null;
+  const solicitacao_veiculo_id = String(formData.get("solicitacao_veiculo_id") ?? "") || null;
 
   if (!protocolo) {
     redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent("Informe o protocolo")}`);
@@ -120,6 +123,7 @@ export async function editarReembolso(id: string, formData: FormData) {
       municipio,
       valor,
       solicitacao_diaria_id,
+      solicitacao_veiculo_id,
     })
     .eq("id", id);
 
