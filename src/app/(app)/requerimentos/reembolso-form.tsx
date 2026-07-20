@@ -34,6 +34,8 @@ export type ValoresIniciaisReembolso = {
   valor: number;
   solicitacao_diaria_id: string;
   solicitacao_veiculo_id: string;
+  placa_veiculo: string;
+  modelo_veiculo: string;
 };
 
 export function ReembolsoForm({
@@ -74,6 +76,8 @@ export function ReembolsoForm({
   const [solicitacaoVeiculoId, setSolicitacaoVeiculoId] = useState(
     valoresIniciais?.solicitacao_veiculo_id ?? "",
   );
+  const [placaVeiculo, setPlacaVeiculo] = useState(valoresIniciais?.placa_veiculo ?? "");
+  const [modeloVeiculo, setModeloVeiculo] = useState(valoresIniciais?.modelo_veiculo ?? "");
 
   const valorInicialTexto = valoresIniciais?.valor
     ? valoresIniciais.valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
@@ -109,6 +113,8 @@ export function ReembolsoForm({
     dataVolta: dataVolta || null,
     municipio,
     valor: valorNumero,
+    placaVeiculo,
+    modeloVeiculo,
   });
 
   return (
@@ -282,27 +288,53 @@ export function ReembolsoForm({
         </div>
 
         {subassunto === "combustivel" && (
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
-              Vincular a uma locação de veículo (opcional)
-            </label>
-            <select
-              name="solicitacao_veiculo_id"
-              value={solicitacaoVeiculoId}
-              onChange={(e) => setSolicitacaoVeiculoId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="">Nenhuma</option>
-              {veiculos.map((v) => (
-                <option key={v.id} value={v.id}>
-                  Locação {v.numero}/{v.ano} — {v.veiculo_descricao}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-slate-500">
-              Só pra referência/rastreabilidade — não altera nenhum valor automaticamente.
-            </p>
-          </div>
+          <>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-slate-700">
+                Vincular a uma locação de veículo (opcional)
+              </label>
+              <select
+                name="solicitacao_veiculo_id"
+                value={solicitacaoVeiculoId}
+                onChange={(e) => setSolicitacaoVeiculoId(e.target.value)}
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="">Nenhuma</option>
+                {veiculos.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    Locação {v.numero}/{v.ano} — {v.veiculo_descricao}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-slate-500">
+                Só pra referência/rastreabilidade — não altera nenhum valor automaticamente.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Placa do veículo</label>
+              <input
+                name="placa_veiculo"
+                required
+                value={placaVeiculo}
+                onChange={(e) => setPlacaVeiculo(e.target.value.toUpperCase())}
+                placeholder="ABC-1234"
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm uppercase"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Modelo do veículo</label>
+              <input
+                name="modelo_veiculo"
+                required
+                value={modeloVeiculo}
+                onChange={(e) => setModeloVeiculo(e.target.value)}
+                placeholder="Ex.: Fiat Uno"
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </>
         )}
       </div>
 

@@ -70,6 +70,8 @@ export default async function DetalheReembolsoPage({
     dataVolta: requerimento.data_volta,
     municipio: requerimento.municipio,
     valor: Number(requerimento.valor),
+    placaVeiculo: requerimento.placa_veiculo,
+    modeloVeiculo: requerimento.modelo_veiculo,
   });
 
   return (
@@ -137,6 +139,18 @@ export default async function DetalheReembolsoPage({
           <dt className="text-slate-500">Município</dt>
           <dd className="text-slate-900">{requerimento.municipio}</dd>
         </div>
+        {requerimento.subassunto === "combustivel" && (
+          <>
+            <div>
+              <dt className="text-slate-500">Placa do veículo</dt>
+              <dd className="text-slate-900">{requerimento.placa_veiculo ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Modelo do veículo</dt>
+              <dd className="text-slate-900">{requerimento.modelo_veiculo ?? "—"}</dd>
+            </div>
+          </>
+        )}
         {diaria && (
           <div className="sm:col-span-2">
             <dt className="text-slate-500">Diária vinculada</dt>

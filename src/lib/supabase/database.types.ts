@@ -337,6 +337,8 @@ export interface Database {
           valor: number;
           solicitacao_diaria_id: string | null;
           solicitacao_veiculo_id: string | null;
+          placa_veiculo: string | null;
+          modelo_veiculo: string | null;
           status: StatusRequerimentoReembolso;
           decisao: DecisaoRequerimentoReembolso | null;
           decisao_data: string | null;

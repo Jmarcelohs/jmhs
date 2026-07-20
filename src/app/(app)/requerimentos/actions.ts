@@ -24,6 +24,8 @@ export async function criarReembolso(formData: FormData) {
   const valor = Number(formData.get("valor") ?? 0);
   const solicitacao_diaria_id = String(formData.get("solicitacao_diaria_id") ?? "") || null;
   const solicitacao_veiculo_id = String(formData.get("solicitacao_veiculo_id") ?? "") || null;
+  const placa_veiculo = String(formData.get("placa_veiculo") ?? "").trim().toUpperCase() || null;
+  const modelo_veiculo = String(formData.get("modelo_veiculo") ?? "").trim() || null;
 
   if (
     !pessoa_id ||
@@ -36,6 +38,13 @@ export async function criarReembolso(formData: FormData) {
   ) {
     redirect(
       `/requerimentos/novo?error=${encodeURIComponent("Preencha todos os campos obrigatórios")}`,
+    );
+  }
+
+  // Combustível/estacionamento precisa identificar o veículo usado.
+  if (subassunto === "combustivel" && (!placa_veiculo || !modelo_veiculo)) {
+    redirect(
+      `/requerimentos/novo?error=${encodeURIComponent("Informe a placa e o modelo do veículo")}`,
     );
   }
 
@@ -75,6 +84,8 @@ export async function criarReembolso(formData: FormData) {
       valor,
       solicitacao_diaria_id,
       solicitacao_veiculo_id,
+      placa_veiculo,
+      modelo_veiculo,
       criado_por: usuario.id,
     })
     .select("id")
@@ -106,9 +117,17 @@ export async function editarReembolso(id: string, formData: FormData) {
   const valor = Number(formData.get("valor") ?? 0);
   const solicitacao_diaria_id = String(formData.get("solicitacao_diaria_id") ?? "") || null;
   const solicitacao_veiculo_id = String(formData.get("solicitacao_veiculo_id") ?? "") || null;
+  const placa_veiculo = String(formData.get("placa_veiculo") ?? "").trim().toUpperCase() || null;
+  const modelo_veiculo = String(formData.get("modelo_veiculo") ?? "").trim() || null;
 
   if (!protocolo) {
     redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent("Informe o protocolo")}`);
+  }
+
+  if (subassunto === "combustivel" && (!placa_veiculo || !modelo_veiculo)) {
+    redirect(
+      `/requerimentos/${id}/editar?error=${encodeURIComponent("Informe a placa e o modelo do veículo")}`,
+    );
   }
 
   const { error } = await supabase
@@ -124,6 +143,8 @@ export async function editarReembolso(id: string, formData: FormData) {
       valor,
       solicitacao_diaria_id,
       solicitacao_veiculo_id,
+      placa_veiculo,
+      modelo_veiculo,
     })
     .eq("id", id);
 

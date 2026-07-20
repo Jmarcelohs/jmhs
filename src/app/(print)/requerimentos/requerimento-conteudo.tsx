@@ -17,6 +17,8 @@ type Requerimento = {
   data_volta: string | null;
   municipio: string;
   valor: number;
+  placa_veiculo: string | null;
+  modelo_veiculo: string | null;
   status: StatusRequerimentoReembolso;
   decisao: DecisaoRequerimentoReembolso | null;
   decisao_data: string | null;
@@ -81,6 +83,15 @@ export function RequerimentoConteudo({
           <Celula span={12} className="text-center">
             {formatarMoeda(requerimento.valor)} ({valorPorExtenso(requerimento.valor)})
           </Celula>
+
+          {requerimento.subassunto === "combustivel" && (
+            <>
+              <Celula span={6} className={headerCell}>Placa do veículo</Celula>
+              <Celula span={6} className={headerCell}>Modelo do veículo</Celula>
+              <Celula span={6} className="text-center">{requerimento.placa_veiculo ?? "—"}</Celula>
+              <Celula span={6} className="text-center">{requerimento.modelo_veiculo ?? "—"}</Celula>
+            </>
+          )}
         </TabelaGrid>
 
         <p className="mt-6 text-[9pt] leading-relaxed text-justify">
@@ -96,6 +107,8 @@ export function RequerimentoConteudo({
             dataVolta: requerimento.data_volta,
             municipio: requerimento.municipio,
             valor: requerimento.valor,
+            placaVeiculo: requerimento.placa_veiculo,
+            modeloVeiculo: requerimento.modelo_veiculo,
           })}
         </p>
 

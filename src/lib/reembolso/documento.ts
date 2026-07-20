@@ -32,6 +32,8 @@ export function corpoReembolso({
   dataVolta,
   municipio,
   valor,
+  placaVeiculo,
+  modeloVeiculo,
 }: {
   nome: string;
   cargoDeclarado: string;
@@ -41,14 +43,23 @@ export function corpoReembolso({
   dataVolta: string | null;
   municipio: string;
   valor: number;
+  placaVeiculo?: string | null;
+  modeloVeiculo?: string | null;
 }) {
   const nomeTexto = nome || "[solicitante]";
   const municipioTexto = municipio || "[município]";
 
+  // Reembolso de combustível/estacionamento identifica o veículo
+  // utilizado (placa e modelo) direto no corpo do requerimento.
+  const clausulaVeiculo =
+    subassunto === "combustivel" && (placaVeiculo || modeloVeiculo)
+      ? `, utilizando o veículo de placa ${placaVeiculo || "—"}, modelo ${modeloVeiculo || "—"},`
+      : ",";
+
   return (
     `${nomeTexto}, ${cargoDeclarado}, portador(a) do CPF nº ${cpf ?? "—"}, vem respeitosamente ` +
     `requerer a Vossa Excelência, com fundamento no ${FUNDAMENTO_REEMBOLSO}, o reembolso de ` +
-    `${SUBASSUNTO_LABEL[subassunto]}, referentes à viagem ao município de ${municipioTexto}, ` +
+    `${SUBASSUNTO_LABEL[subassunto]}${clausulaVeiculo} referentes à viagem ao município de ${municipioTexto}, ` +
     `realizada no período de ${formatarData(dataIda)} a ${formatarData(dataVolta)}, no valor de ` +
     `${formatarMoeda(valor)} (${valorPorExtenso(valor)}), solicitando o pagamento pelos meios de praxe.`
   );

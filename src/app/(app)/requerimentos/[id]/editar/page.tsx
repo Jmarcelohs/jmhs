@@ -82,6 +82,8 @@ export default async function EditarReembolsoPage({
           valor: Number(requerimento.valor),
           solicitacao_diaria_id: requerimento.solicitacao_diaria_id ?? "",
           solicitacao_veiculo_id: requerimento.solicitacao_veiculo_id ?? "",
+          placa_veiculo: requerimento.placa_veiculo ?? "",
+          modelo_veiculo: requerimento.modelo_veiculo ?? "",
         }}
       />
     </div>
