@@ -51,6 +51,7 @@ export function PaginaA4({
 }) {
   return (
     <div
+      data-print-pagina
       className={`mx-auto flex h-[297mm] w-[210mm] flex-col bg-white bg-cover bg-no-repeat text-[9pt] text-black shadow-lg print:shadow-none ${
         quebrarPagina ? "print:break-after-page" : ""
       }`}
