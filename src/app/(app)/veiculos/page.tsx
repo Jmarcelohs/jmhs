@@ -139,6 +139,11 @@ export default async function VeiculosPage({
                       url={`/api/veiculos/${l.id}/pdf`}
                       nomeArquivoPadrao={`locacao-veiculo-${l.numero}-${l.ano}.pdf`}
                     />
+                    <DownloadPdfButton
+                      url={`/api/veiculos/${l.id}/imagem`}
+                      nomeArquivoPadrao={`locacao-veiculo-${l.numero}-${l.ano}.png`}
+                      label="Baixar imagem"
+                    />
                     {podeGerenciar && (
                       <>
                         <Link
