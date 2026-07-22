@@ -28,6 +28,7 @@ export type ValoresIniciaisReembolso = {
   cargo_declarado: CargoDeclarado;
   cpf: string;
   subassunto: SubassuntoReembolso;
+  data_requerimento: string;
   data_ida: string;
   data_volta: string;
   municipio: string;
@@ -136,6 +137,17 @@ export function ReembolsoForm({
               ? "Gerado automaticamente na criação — só altere se precisar corrigir a numeração."
               : "Deixe em branco para gerar automaticamente (sequencial por ano) ou digite o número manualmente."}
           </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Data do requerimento</label>
+          <input
+            type="date"
+            name="data_requerimento"
+            required
+            defaultValue={valoresIniciais?.data_requerimento ?? ""}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
         </div>
 
         <div>

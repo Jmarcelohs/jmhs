@@ -75,6 +75,7 @@ export default async function EditarSolicitacaoPage({
         valoresIniciais={{
           numero_diaria: solicitacao.numero_diaria ?? "",
           numero_solicitacao: solicitacao.numero_solicitacao ?? "",
+          data_solicitacao: solicitacao.data_solicitacao ?? "",
           municipio_destino: solicitacao.municipio_destino ?? "",
           instituicao_destino: solicitacao.instituicao_destino ?? "",
           contato_destino: solicitacao.contato_destino ?? "",

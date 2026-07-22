@@ -157,9 +157,7 @@ export function VeiculoLocacaoForm({
   const [valorDiaria, setValorDiaria] = useState(valoresIniciais?.valor_diaria ?? 0);
   const [qtdDiarias, setQtdDiarias] = useState(valoresIniciais?.qtd_diarias ?? 1);
 
-  const [dataPedido, setDataPedido] = useState(
-    valoresIniciais?.data_pedido ?? new Date().toISOString().slice(0, 10),
-  );
+  const [dataPedido, setDataPedido] = useState(valoresIniciais?.data_pedido ?? "");
   const [dataRetirada, setDataRetirada] = useState(valoresIniciais?.data_retirada ?? "");
   const [horaRetirada, setHoraRetirada] = useState(valoresIniciais?.hora_retirada ?? "");
   const [localRetirada, setLocalRetirada] = useState(

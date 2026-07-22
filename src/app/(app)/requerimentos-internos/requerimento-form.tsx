@@ -53,9 +53,7 @@ export function RequerimentoInternoForm({
   const [cargo, setCargo] = useState<CargoDeclarado>(valoresIniciais?.cargo ?? "Servidor(a)");
   const [cpf, setCpf] = useState(formatarCpfDigitado(valoresIniciais?.cpf ?? ""));
   const [matricula, setMatricula] = useState(valoresIniciais?.matricula ?? "");
-  const [dataRequerimento, setDataRequerimento] = useState(
-    valoresIniciais?.data_requerimento ?? new Date().toISOString().slice(0, 10),
-  );
+  const [dataRequerimento, setDataRequerimento] = useState(valoresIniciais?.data_requerimento ?? "");
 
   const [assuntoKey, setAssuntoKey] = useState(valoresIniciais?.assunto_key ?? "");
   const [assuntoTitulo, setAssuntoTitulo] = useState(valoresIniciais?.assuntoTitulo ?? "");

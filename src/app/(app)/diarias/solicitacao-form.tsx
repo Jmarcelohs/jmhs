@@ -17,6 +17,7 @@ type Item = {
 export type ValoresIniciais = {
   numero_diaria: string;
   numero_solicitacao: string;
+  data_solicitacao: string;
   municipio_destino: string;
   instituicao_destino: string;
   contato_destino: string;
@@ -176,6 +177,16 @@ export function SolicitacaoForm({
             name="numero_solicitacao"
             defaultValue={valoresIniciais?.numero_solicitacao}
             placeholder="ex.: 020/2026"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">Data da solicitação</label>
+          <input
+            type="date"
+            name="data_solicitacao"
+            required
+            defaultValue={valoresIniciais?.data_solicitacao}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>

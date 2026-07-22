@@ -29,10 +29,11 @@ export async function criarSolicitacao(formData: FormData) {
   const finalidade = String(formData.get("finalidade") ?? "");
   const data_partida = String(formData.get("data_partida") ?? "") || null;
   const data_chegada = String(formData.get("data_chegada") ?? "") || null;
+  const data_solicitacao = String(formData.get("data_solicitacao") ?? "") || null;
   const itens: ItemInput[] = JSON.parse(String(formData.get("itens") ?? "[]"));
 
-  if (!pessoa_id || itens.length === 0) {
-    redirect("/diarias/nova?error=Preencha+o+solicitante+e+ao+menos+um+item");
+  if (!pessoa_id || !data_solicitacao || itens.length === 0) {
+    redirect("/diarias/nova?error=Preencha+o+solicitante,+a+data+da+solicitação+e+ao+menos+um+item");
   }
 
   const supabase = await createClient();
@@ -54,7 +55,7 @@ export async function criarSolicitacao(formData: FormData) {
       finalidade,
       data_partida,
       data_chegada,
-      data_solicitacao: new Date().toISOString().slice(0, 10),
+      data_solicitacao,
       total,
       criado_por: usuario?.id,
     })
@@ -98,10 +99,11 @@ export async function editarSolicitacao(id: string, formData: FormData) {
   const finalidade = String(formData.get("finalidade") ?? "");
   const data_partida = String(formData.get("data_partida") ?? "") || null;
   const data_chegada = String(formData.get("data_chegada") ?? "") || null;
+  const data_solicitacao = String(formData.get("data_solicitacao") ?? "") || null;
   const itens: ItemInput[] = JSON.parse(String(formData.get("itens") ?? "[]"));
 
-  if (itens.length === 0) {
-    redirect(`/diarias/${id}/editar?error=Inclua+ao+menos+um+item`);
+  if (!data_solicitacao || itens.length === 0) {
+    redirect(`/diarias/${id}/editar?error=Preencha+a+data+da+solicitação+e+inclua+ao+menos+um+item`);
   }
 
   const supabase = await createClient();
@@ -122,6 +124,7 @@ export async function editarSolicitacao(id: string, formData: FormData) {
       finalidade,
       data_partida,
       data_chegada,
+      data_solicitacao,
       total,
     })
     .eq("id", id);

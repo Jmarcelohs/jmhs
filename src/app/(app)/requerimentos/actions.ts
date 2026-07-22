@@ -18,6 +18,7 @@ export async function criarReembolso(formData: FormData) {
   const cargo_declarado = String(formData.get("cargo_declarado") ?? "") as CargoDeclarado;
   const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
   const subassunto = String(formData.get("subassunto") ?? "") as SubassuntoReembolso;
+  const data_requerimento = String(formData.get("data_requerimento") ?? "") || null;
   const data_ida = String(formData.get("data_ida") ?? "") || null;
   const data_volta = String(formData.get("data_volta") ?? "") || null;
   const municipio = String(formData.get("municipio") ?? "").trim();
@@ -31,6 +32,7 @@ export async function criarReembolso(formData: FormData) {
     !pessoa_id ||
     !cargo_declarado ||
     !subassunto ||
+    !data_requerimento ||
     !data_ida ||
     !data_volta ||
     !municipio ||
@@ -76,7 +78,7 @@ export async function criarReembolso(formData: FormData) {
       pessoa_id,
       cargo_declarado,
       cpf,
-      data_requerimento: hoje(),
+      data_requerimento,
       subassunto,
       data_ida,
       data_volta,
@@ -111,6 +113,7 @@ export async function editarReembolso(id: string, formData: FormData) {
   const cargo_declarado = String(formData.get("cargo_declarado") ?? "") as CargoDeclarado;
   const cpf = apenasDigitos(String(formData.get("cpf") ?? "")) || null;
   const subassunto = String(formData.get("subassunto") ?? "") as SubassuntoReembolso;
+  const data_requerimento = String(formData.get("data_requerimento") ?? "") || null;
   const data_ida = String(formData.get("data_ida") ?? "");
   const data_volta = String(formData.get("data_volta") ?? "");
   const municipio = String(formData.get("municipio") ?? "").trim();
@@ -120,8 +123,8 @@ export async function editarReembolso(id: string, formData: FormData) {
   const placa_veiculo = String(formData.get("placa_veiculo") ?? "").trim().toUpperCase() || null;
   const modelo_veiculo = String(formData.get("modelo_veiculo") ?? "").trim() || null;
 
-  if (!protocolo) {
-    redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent("Informe o protocolo")}`);
+  if (!protocolo || !data_requerimento) {
+    redirect(`/requerimentos/${id}/editar?error=${encodeURIComponent("Informe o protocolo e a data do requerimento")}`);
   }
 
   if (subassunto === "combustivel" && (!placa_veiculo || !modelo_veiculo)) {
@@ -137,6 +140,7 @@ export async function editarReembolso(id: string, formData: FormData) {
       cargo_declarado,
       cpf,
       subassunto,
+      data_requerimento,
       data_ida,
       data_volta,
       municipio,
